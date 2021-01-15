@@ -14,16 +14,16 @@ let dy = -2;
 
 let ballRadius = 3;
 
-// variables to draw the paddle
+// variables to move the paddle
 
-let paddleHeight = 10;
+let paddleHeight = 5;
 let paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
 // variables to control the paddle
 
-let rightpressed = false;
-let leftpressed = false;
+let rightPressed = false;
+let leftPressed = false;
 
 // drawing on the canvas
 
@@ -44,9 +44,10 @@ function drawPaddle() {
     ctx.closePath();
 }
 
-function moveBall() {
+function movement() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBall();
+    drawPaddle();
 
     if(y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
         dy = -dy;
@@ -56,8 +57,45 @@ function moveBall() {
         dx = -dx;
     }
    
+     if(rightPressed) {
+        paddleX += 7;
+        if (paddleX + paddleWidth > canvas.width) {
+            paddleX = canvas.width - paddleWidth;
+        }
+    }
+
+    if(leftPressed) {
+        paddleX -= 7;
+        if (paddleX < 0) {
+            paddleX = 0;
+        }
+    }
+
     x += dx;
     y += dy;
 }
 
-setInterval(moveBall, 10);
+// moving the paddle
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+function keyDownHandler(control) {
+    if (control.key == "Right" || control.key == "ArrowRight") {
+        rightPressed = true;
+    }
+    else if (control.key == "Left" || control.key == "ArrowLeft") {
+        leftPressed = true;
+    }
+}
+
+function keyUpHandler(control) {
+    if (control.key == "Right" || control.key == "ArrowRight") {
+        rightPressed = false;
+    }
+    else if (control.key == "Left" || control.key == "ArrowLeft") {
+        leftPressed = false;
+    }
+}
+
+setInterval(movement, 10);
