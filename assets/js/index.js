@@ -12,11 +12,11 @@ let dy = -2;
 
 // variables to adjust collision frame
 
-let ballRadius = 3;
+let ballRadius = 2;
 
 // variables to move the paddle
 
-let paddleHeight = 5;
+let paddleHeight = 2;
 let paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
@@ -24,6 +24,27 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 
 let rightPressed = false;
 let leftPressed = false;
+
+// variables to create the brick wall
+
+let brickRowCount = 5;
+let brickColumnCount = 10;
+let brickWidth = 25;
+let brickHeight = 5;
+let brickPadding = 5;
+let brickOffsetTop = 5;
+let brickOffsetLeft = 5;
+
+// creating the two dimensional array for the bricks
+
+var bricks = [];
+
+    for(var c = 0; c < brickColumnCount; c++) {
+        bricks[c] = [];
+        for(var r = 0; r < brickRowCount; r++) {
+            bricks[c][r] = {x: 0, y: 0};
+        }
+    }
 
 // drawing on the canvas
 
@@ -44,13 +65,38 @@ function drawPaddle() {
     ctx.closePath();
 }
 
+function drawBricks() {
+    for(var c = 0; c < brickColumnCount; c++) {
+        for(var r = 0; r < brickRowCount; r++) {
+            var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+            var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+            bricks [c][r].x = brickX;
+            bricks [c][r].y = brickY;
+            ctx.beginPath();
+            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+}
+
 function movement() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
     drawBall();
     drawPaddle();
 
-    if(y + dy < ballRadius || y + dy > canvas.height - ballRadius) {
+    if(y + dy < ballRadius) {
         dy = -dy;
+    } else if (y + dy > canvas.height-ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) {
+            dy = -dy;
+        } else {
+        alert("GAME OVER");
+        document.location.reload();
+        clearInterval(interval);
+        }
     }
 
     if(x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
@@ -58,14 +104,14 @@ function movement() {
     }
    
      if(rightPressed) {
-        paddleX += 7;
+        paddleX += 5;
         if (paddleX + paddleWidth > canvas.width) {
             paddleX = canvas.width - paddleWidth;
         }
     }
 
     if(leftPressed) {
-        paddleX -= 7;
+        paddleX -= 5;
         if (paddleX < 0) {
             paddleX = 0;
         }
@@ -98,4 +144,4 @@ function keyUpHandler(control) {
     }
 }
 
-setInterval(movement, 10);
+let interval = setInterval(movement, 10);
