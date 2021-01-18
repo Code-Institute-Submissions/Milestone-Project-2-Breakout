@@ -1,22 +1,24 @@
 // variables for enabling rendering graphics
 
 let canvas = document.getElementById("gameCanvas");
+canvas.width = canvas.getBoundingClientRect().width;
+canvas.height = canvas.getBoundingClientRect().height;
 let ctx = canvas.getContext("2d");
 
 // variables to make the ball move
 
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 1;
-let dy = -1;
+let dx = 2;
+let dy = -2;
 
 // variables to adjust collision frame
 
-let ballRadius = 2;
+let ballRadius = 3;
 
 // variables to move the paddle
 
-let paddleHeight = 2;
+let paddleHeight = 3;
 let paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
 
@@ -29,11 +31,15 @@ let leftPressed = false;
 
 let brickRowCount = 5;
 let brickColumnCount = 10;
-let brickWidth = 25;
-let brickHeight = 5;
+let brickWidth = 50;
+let brickHeight = 10;
 let brickPadding = 5;
-let brickOffsetTop = 5;
-let brickOffsetLeft = 5;
+let brickOffsetTop = 25;
+let brickOffsetLeft = 25;
+
+// counting te score
+
+let score = 0;
 
 // creating the two dimensional array for the bricks
 
@@ -88,6 +94,7 @@ function movement() {
     drawBricks();
     drawBall();
     drawPaddle();
+    drawScore();
     collisionDetection();
 
     if(y + dy < ballRadius) {
@@ -128,6 +135,7 @@ function movement() {
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
 
 function keyDownHandler(control) {
     if (control.key == "Right" || control.key == "ArrowRight") {
@@ -147,6 +155,15 @@ function keyUpHandler(control) {
     }
 }
 
+function mouseMoveHandler(control) {
+    let relativeX = control.clientX - canvas.offsetLeft;
+    if(relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+}
+
+// detect collision
+
 function collisionDetection() {
     for(let c = 0; c < brickColumnCount; c++) {
         for(let r = 0; r < brickRowCount; r++) {
@@ -155,10 +172,24 @@ function collisionDetection() {
             if(x > collisionBrick.x && x < collisionBrick.x+brickWidth && y > collisionBrick.y && y < collisionBrick.y+brickHeight) {
                 dy = -dy;
                 collisionBrick.status = 0;
+                score++;
+                if (score == brickRowCount * brickColumnCount) {
+                    alert("YOU WIN, CONGRATULATIONS!");
+                    document.location.reload();
+                    clearInterval(interval);
+                    }
                 }
             }
         }
     }
+}
+
+// score board
+
+function drawScore() {
+    ctx.font = "bold 14px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("SCORE: "+score, 25, 20);
 }
 
 let interval = setInterval(movement, 10);
