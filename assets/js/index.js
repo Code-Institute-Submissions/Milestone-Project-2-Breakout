@@ -7,8 +7,8 @@ let ctx = canvas.getContext("2d");
 
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 2;
-let dy = -2;
+let dx = 1;
+let dy = -1;
 
 // variables to adjust collision frame
 
@@ -42,7 +42,7 @@ var bricks = [];
     for(var c = 0; c < brickColumnCount; c++) {
         bricks[c] = [];
         for(var r = 0; r < brickRowCount; r++) {
-            bricks[c][r] = {x: 0, y: 0};
+            bricks[c][r] = {x: 0, y: 0, status: 1};
         }
     }
 
@@ -66,10 +66,11 @@ function drawPaddle() {
 }
 
 function drawBricks() {
-    for(var c = 0; c < brickColumnCount; c++) {
-        for(var r = 0; r < brickRowCount; r++) {
-            var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
-            var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+    for(let c = 0; c < brickColumnCount; c++) {
+        for(let r = 0; r < brickRowCount; r++) {
+            if(bricks[c][r].status == 1) {
+            let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+            let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
             bricks [c][r].x = brickX;
             bricks [c][r].y = brickY;
             ctx.beginPath();
@@ -77,6 +78,7 @@ function drawBricks() {
             ctx.fillStyle = "#0095DD";
             ctx.fill();
             ctx.closePath();
+            }
         }
     }
 }
@@ -86,6 +88,7 @@ function movement() {
     drawBricks();
     drawBall();
     drawPaddle();
+    collisionDetection();
 
     if(y + dy < ballRadius) {
         dy = -dy;
@@ -141,6 +144,20 @@ function keyUpHandler(control) {
     }
     else if (control.key == "Left" || control.key == "ArrowLeft") {
         leftPressed = false;
+    }
+}
+
+function collisionDetection() {
+    for(let c = 0; c < brickColumnCount; c++) {
+        for(let r = 0; r < brickRowCount; r++) {
+            let collisionBrick = bricks[c][r];
+            if(collisionBrick.status == 1) {
+            if(x > collisionBrick.x && x < collisionBrick.x+brickWidth && y > collisionBrick.y && y < collisionBrick.y+brickHeight) {
+                dy = -dy;
+                collisionBrick.status = 0;
+                }
+            }
+        }
     }
 }
 
