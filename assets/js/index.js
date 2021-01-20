@@ -41,6 +41,10 @@ let brickOffsetLeft = 25;
 
 let score = 0;
 
+// initializing lives
+
+let lives = 3;
+
 // creating the two dimensional array for the bricks
 
 var bricks = [];
@@ -156,11 +160,28 @@ function keyUpHandler(control) {
 }
 
 function mouseMoveHandler(control) {
-    let relativeX = control.clientX - canvas.offsetLeft;
-    if(relativeX > 0 && relativeX < canvas.width) {
+    let relativeX = control.clientX;
+    if(relativeX > paddleWidth / 2 && relativeX < canvas.width - paddleWidth / 2) {
         paddleX = relativeX - paddleWidth / 2;
     }
+    
 }
+
+/*
+     if(rightPressed) {
+        paddleX += 5;
+        if (paddleX + paddleWidth > canvas.width) {
+            paddleX = canvas.width - paddleWidth;
+        }
+    }
+
+    if(leftPressed) {
+        paddleX -= 5;
+        if (paddleX < 0) {
+            paddleX = 0;
+        }
+    }
+*/
 
 // detect collision
 
@@ -184,12 +205,18 @@ function collisionDetection() {
     }
 }
 
-// score board
+// score board and lives
 
 function drawScore() {
-    ctx.font = "bold 14px Arial";
+    ctx.font = "bold 12px Arial";
     ctx.fillStyle = "#0095DD";
     ctx.fillText("SCORE: "+score, 25, 20);
 }
 
-let interval = setInterval(movement, 10);
+function drawLives() {
+    ctx.font = "bold 12px Arial";
+    ctx.fillStyle = "0095DD";
+    ctx.fillText("LIVES: "+lives, canvas.width - 75, 20);
+}
+
+let interval = setInterval(movement, 12);
