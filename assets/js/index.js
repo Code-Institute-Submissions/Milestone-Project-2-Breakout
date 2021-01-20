@@ -9,8 +9,8 @@ let ctx = canvas.getContext("2d");
 
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 2;
-let dy = -2;
+let dx = 5;
+let dy = -5;
 
 // variables to adjust collision frame
 
@@ -93,12 +93,13 @@ function drawBricks() {
     }
 }
 
-function movement() {
+function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     drawBall();
     drawPaddle();
     drawScore();
+    drawLives();
     collisionDetection();
 
     if(y + dy < ballRadius) {
@@ -107,9 +108,17 @@ function movement() {
         if(x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
         } else {
-        alert("GAME OVER");
-        document.location.reload();
-        clearInterval(interval);
+        lives--;
+        if(!lives) {
+            alert("GAME OVER");
+            document.location.reload();
+        } else {
+            x = canvas.width / 2;
+            y = canvas.height - 30;
+            dx = 5;
+            dy = -5;
+            paddleX = (canvas.width - paddleWidth) / 2;
+            }
         }
     }
 
@@ -133,6 +142,8 @@ function movement() {
 
     x += dx;
     y += dy;
+
+    requestAnimationFrame(draw);
 }
 
 // moving the paddle
@@ -167,22 +178,6 @@ function mouseMoveHandler(control) {
     
 }
 
-/*
-     if(rightPressed) {
-        paddleX += 5;
-        if (paddleX + paddleWidth > canvas.width) {
-            paddleX = canvas.width - paddleWidth;
-        }
-    }
-
-    if(leftPressed) {
-        paddleX -= 5;
-        if (paddleX < 0) {
-            paddleX = 0;
-        }
-    }
-*/
-
 // detect collision
 
 function collisionDetection() {
@@ -197,7 +192,6 @@ function collisionDetection() {
                 if (score == brickRowCount * brickColumnCount) {
                     alert("YOU WIN, CONGRATULATIONS!");
                     document.location.reload();
-                    clearInterval(interval);
                     }
                 }
             }
@@ -216,7 +210,7 @@ function drawScore() {
 function drawLives() {
     ctx.font = "bold 12px Arial";
     ctx.fillStyle = "0095DD";
-    ctx.fillText("LIVES: "+lives, canvas.width - 75, 20);
+    ctx.fillText("LIVES: "+lives, canvas.width - 80, 20);
 }
 
-let interval = setInterval(movement, 12);
+draw();
