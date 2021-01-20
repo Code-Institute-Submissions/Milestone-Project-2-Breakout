@@ -9,8 +9,8 @@ let ctx = canvas.getContext("2d");
 
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 5;
-let dy = -5;
+let dx = 4;
+let dy = -4;
 
 // variables to adjust collision frame
 
@@ -93,59 +93,6 @@ function drawBricks() {
     }
 }
 
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks();
-    drawBall();
-    drawPaddle();
-    drawScore();
-    drawLives();
-    collisionDetection();
-
-    if(y + dy < ballRadius) {
-        dy = -dy;
-    } else if (y + dy > canvas.height-ballRadius) {
-        if(x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-        } else {
-        lives--;
-        if(!lives) {
-            alert("GAME OVER");
-            document.location.reload();
-        } else {
-            x = canvas.width / 2;
-            y = canvas.height - 30;
-            dx = 5;
-            dy = -5;
-            paddleX = (canvas.width - paddleWidth) / 2;
-            }
-        }
-    }
-
-    if(x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
-        dx = -dx;
-    }
-   
-     if(rightPressed) {
-        paddleX += 5;
-        if (paddleX + paddleWidth > canvas.width) {
-            paddleX = canvas.width - paddleWidth;
-        }
-    }
-
-    if(leftPressed) {
-        paddleX -= 5;
-        if (paddleX < 0) {
-            paddleX = 0;
-        }
-    }
-
-    x += dx;
-    y += dy;
-
-    requestAnimationFrame(draw);
-}
-
 // moving the paddle
 
 document.addEventListener("keydown", keyDownHandler, false);
@@ -211,6 +158,61 @@ function drawLives() {
     ctx.font = "bold 12px Arial";
     ctx.fillStyle = "0095DD";
     ctx.fillText("LIVES: "+lives, canvas.width - 80, 20);
+}
+
+// Here all game functionalities come together
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBall();
+    drawPaddle();
+    drawScore();
+    drawLives();
+    collisionDetection();
+
+    if(y + dy < ballRadius) {
+        dy = -dy;
+    } else if (y + dy > canvas.height-ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) {
+            dy = -dy;
+        } else {
+        lives--;
+        if(!lives) {
+            alert("GAME OVER");
+            document.location.reload();
+        } else {
+            x = canvas.width / 2;
+            y = canvas.height - 30;
+            dx = 4;
+            dy = -4;
+            paddleX = (canvas.width - paddleWidth) / 2;
+            }
+        }
+    }
+
+    if(x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
+        dx = -dx;
+    }
+   
+     if(rightPressed) {
+        paddleX += 5;
+        if (paddleX + paddleWidth > canvas.width) {
+            paddleX = canvas.width - paddleWidth;
+        }
+    }
+
+    if(leftPressed) {
+        paddleX -= 5;
+        if (paddleX < 0) {
+            paddleX = 0;
+        }
+    }
+
+    x += dx;
+    y += dy;
+
+    requestAnimationFrame(draw);
 }
 
 draw();
