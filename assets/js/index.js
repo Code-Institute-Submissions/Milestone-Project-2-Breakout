@@ -27,6 +27,10 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 
+// variables to control the game
+
+let spacebarPressed = false;
+
 // variables to create the brick wall
 
 let brickRowCount = 5;
@@ -99,6 +103,8 @@ document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
+/*
+
 function keyDownHandler(control) {
     if (control.key == "Right" || control.key == "ArrowRight") {
         rightPressed = true;
@@ -117,12 +123,51 @@ function keyUpHandler(control) {
     }
 }
 
+*/
+
+function keyDownHandler(control) {
+    switch (control.code) {
+        case "Right":
+            rightPressed = true;
+            break;
+        case "ArrowRight":
+            rightPressed = true;
+            break;
+        case "Left":
+            leftPressed = true;
+            break;
+        case "ArrowLeft":
+            leftPressed = true;
+            break;
+        case "Space":
+            spacebarPressed = true;
+    }
+}
+
+function keyUpHandler(control) {
+    switch (control.code) {
+        case "Right":
+            rightPressed = false;
+            break;
+        case "ArrowRight":
+            rightPressed = false;
+            break;
+        case "Left":
+            leftPressed = false;
+            break;
+        case "ArrowLeft":
+            leftPressed = false;
+            break;
+        case "Space":
+            spacebarPressed = false;
+    }
+}
+
 function mouseMoveHandler(control) {
     let relativeX = control.clientX;
     if(relativeX > paddleWidth / 2 && relativeX < canvas.width - paddleWidth / 2) {
         paddleX = relativeX - paddleWidth / 2;
     }
-    
 }
 
 // detect collision
@@ -212,7 +257,16 @@ function draw() {
     x += dx;
     y += dy;
 
+    console.log(spacebarPressed);
+     
     requestAnimationFrame(draw);
+        
 }
 
 draw();
+  
+
+
+
+
+
