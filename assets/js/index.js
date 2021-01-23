@@ -49,6 +49,12 @@ let score = 0;
 
 let lives = 3;
 
+// starting / pausing the game
+
+let T0;
+let T1;
+let movement = false;
+
 // creating the two dimensional array for the bricks
 
 var bricks = [];
@@ -141,6 +147,7 @@ function keyDownHandler(control) {
             break;
         case "Space":
             spacebarPressed = true;
+            T0 = performance.now();
     }
 }
 
@@ -160,6 +167,7 @@ function keyUpHandler(control) {
             break;
         case "Space":
             spacebarPressed = false;
+            T1 = performance.now();
     }
 }
 
@@ -246,7 +254,7 @@ function draw() {
             paddleX = canvas.width - paddleWidth;
         }
     }
-
+   
     if(leftPressed) {
         paddleX -= 5;
         if (paddleX < 0) {
@@ -257,16 +265,20 @@ function draw() {
     x += dx;
     y += dy;
 
-    console.log(spacebarPressed);
-     
+
+    /*
+    if(!movement && (T1 - T0) < 1000) {
+        x += dx;
+        y += dy;
+        movement = true;
+    } else if (movement && (T1 - T0) < 1000) {
+        console.log("now the game should freeze.");
+        movement = false;
+    }
+    */
+
     requestAnimationFrame(draw);
-        
+   
 }
 
 draw();
-  
-
-
-
-
-
