@@ -51,33 +51,30 @@ let lives = 3;
 
 // variables start / pause
 
-paused = false;
+let paused = false;
 
 // creating the two dimensional array for the bricks
 
-var bricks = [];
+let bricks = [];
 
-    for(var c = 0; c < brickColumnCount; c++) {
-        bricks[c] = [];
-        for(var r = 0; r < brickRowCount; r++) {
-            bricks[c][r] = {x: 0, y: 0, status: 1};
+    for(let column = 0; column < brickColumnCount; column++) {
+        bricks[column] = [];
+        for(let row = 0; row < brickRowCount; row++) {
+            bricks[column][row] = {x: 0, y: 0, status: 1, powerUp: 0};
         }
     }
-
-// generate powerups on various locations
-
-powerUpC1 = Math.floor(math.random() * brickColumnCount) + 1;
-powerUpC2 = Math.floor(math.random() * brickColumnCount) + 1;
-powerUpC3 = Math.floor(math.random() * brickColumnCount) + 1;
-
-powerUpR1 = Math.floor(math.random() * brickRowCount) + 1;
-powerUpR2 = Math.floor(math.random() * brickRowCount) + 1;
-powerUpR3 = Math.floor(math.random() * brickRowCount) + 1;
-
-console.log("Location 1: " + PowerUpC1 + " " +PowerUpR1\r"Location 2: " + PowerUpC2 + " " +PowerUpR2\r"Location 3: " + PowerUpC3 + " " +PowerUpR3);
+    
+    for(let i = 0; i < 3; i++) {
+        let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
+        let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
+        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: 1};
+        console.log(bricks[powerUpColumn][powerUpRow]);
+    }
+    
+    
 
 // drawing on the canvas
-
+ 
 function drawBall() {
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
@@ -266,3 +263,7 @@ function draw() {
 }
 
 draw();
+
+
+
+
