@@ -41,19 +41,17 @@ let brickPadding = 5;
 let brickOffsetTop = 25;
 let brickOffsetLeft = 25;
 
-// counting te score
+// variables score
 
 let score = 0;
 
-// initializing lives
+// variables lives
 
 let lives = 3;
 
-// starting / pausing the game
+// variables start / pause
 
-let T0;
-let T1;
-let movement = false;
+paused = false;
 
 // creating the two dimensional array for the bricks
 
@@ -65,6 +63,18 @@ var bricks = [];
             bricks[c][r] = {x: 0, y: 0, status: 1};
         }
     }
+
+// generate powerups on various locations
+
+powerUpC1 = Math.floor(math.random() * brickColumnCount) + 1;
+powerUpC2 = Math.floor(math.random() * brickColumnCount) + 1;
+powerUpC3 = Math.floor(math.random() * brickColumnCount) + 1;
+
+powerUpR1 = Math.floor(math.random() * brickRowCount) + 1;
+powerUpR2 = Math.floor(math.random() * brickRowCount) + 1;
+powerUpR3 = Math.floor(math.random() * brickRowCount) + 1;
+
+console.log("Location 1: " + PowerUpC1 + " " +PowerUpR1\r"Location 2: " + PowerUpC2 + " " +PowerUpR2\r"Location 3: " + PowerUpC3 + " " +PowerUpR3);
 
 // drawing on the canvas
 
@@ -103,34 +113,12 @@ function drawBricks() {
     }
 }
 
-// moving the paddle
+// gamecontrols
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
 document.addEventListener("mousemove", mouseMoveHandler, false);
 
-/*
-
-function keyDownHandler(control) {
-    if (control.key == "Right" || control.key == "ArrowRight") {
-        rightPressed = true;
-    }
-    else if (control.key == "Left" || control.key == "ArrowLeft") {
-        leftPressed = true;
-    }
-}
-
-function keyUpHandler(control) {
-    if (control.key == "Right" || control.key == "ArrowRight") {
-        rightPressed = false;
-    }
-    else if (control.key == "Left" || control.key == "ArrowLeft") {
-        leftPressed = false;
-    }
-}
-
-*/
-
 function keyDownHandler(control) {
     switch (control.code) {
         case "Right":
@@ -146,8 +134,7 @@ function keyDownHandler(control) {
             leftPressed = true;
             break;
         case "Space":
-            spacebarPressed = true;
-            T0 = performance.now();
+            togglePause();
     }
 }
 
@@ -164,10 +151,6 @@ function keyUpHandler(control) {
             break;
         case "ArrowLeft":
             leftPressed = false;
-            break;
-        case "Space":
-            spacebarPressed = false;
-            T1 = performance.now();
     }
 }
 
@@ -178,6 +161,16 @@ function mouseMoveHandler(control) {
     }
 }
 
+// starting / pausing the game
+
+function togglePause() {
+    if (!paused) {
+        paused = true;
+    } else if (paused) {
+        paused = false;
+    }
+}
+ 
 // detect collision
 
 function collisionDetection() {
@@ -216,6 +209,7 @@ function drawLives() {
 // Here all game functionalities come together
 
 function draw() {
+    
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     drawBall();
@@ -244,6 +238,8 @@ function draw() {
         }
     }
 
+    if (paused) {
+
     if(x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
         dx = -dx;
     }
@@ -260,25 +256,13 @@ function draw() {
         if (paddleX < 0) {
             paddleX = 0;
         }
-    }
-
-    x += dx;
-    y += dy;
-
-
-    /*
-    if(!movement && (T1 - T0) < 1000) {
+    } 
         x += dx;
         y += dy;
-        movement = true;
-    } else if (movement && (T1 - T0) < 1000) {
-        console.log("now the game should freeze.");
-        movement = false;
     }
-    */
 
     requestAnimationFrame(draw);
-   
+    
 }
 
 draw();
