@@ -27,10 +27,6 @@ let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 
-// variables to control the game
-
-let spacebarPressed = false;
-
 // variables to create the brick wall
 
 let brickRowCount = 5;
@@ -65,10 +61,10 @@ let bricks = [];
     }
     
     for(let i = 0; i < 3; i++) {
-        let test = ["fireBall", "multiBall", "palletGrow"];
+        let powerUps = ["fireBall", "multiBall", "palletGrow"];
         let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
         let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
-        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: test[i]};
+        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: powerUps[i]};
     }
     
 // drawing on the canvas
@@ -78,8 +74,7 @@ function drawBall() {
     ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
-    ctx.closePath;
-    
+    ctx.closePath();
 }
 
 function drawPaddle() {
@@ -261,7 +256,3 @@ function draw() {
 }
 
 draw();
-
-
-
-
