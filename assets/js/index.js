@@ -65,14 +65,12 @@ let bricks = [];
     }
     
     for(let i = 0; i < 3; i++) {
+        let test = ["fireBall", "multiBall", "palletGrow"];
         let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
         let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
-        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: 1};
-        console.log(bricks[powerUpColumn][powerUpRow]);
+        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: test[i]};
     }
     
-    
-
 // drawing on the canvas
  
 function drawBall() {
