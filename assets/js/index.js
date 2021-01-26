@@ -49,7 +49,7 @@ let lives = 3;
 
 let paused = false;
 
-// creating the two dimensional array for the bricks
+// creating the two dimensional array for the bricks and assigning the necessary attributes
 
 let bricks = [];
 
@@ -61,10 +61,12 @@ let bricks = [];
     }
     
     for(let i = 0; i < 3; i++) {
-        let powerUps = ["fireBall", "multiBall", "palletGrow"];
-        let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
-        let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
-        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: powerUps[i]};
+        var powerUpColumn = Math.floor(Math.random() * brickColumnCount);
+        var powerUpRow = Math.floor(Math.random() * brickRowCount);
+        bricks[powerUpColumn][powerUpRow] = {x: 0, y: 0, status: 1, powerUp: 1};
+        var powerUpBrick = bricks[powerUpColumn][powerUpRow];
+        console.log(powerUpColumn + " " + powerUpRow);
+        console.log(powerUpBrick);
     }
     
 // drawing on the canvas
@@ -86,13 +88,13 @@ function drawPaddle() {
 }
 
 function drawBricks() {
-    for(let c = 0; c < brickColumnCount; c++) {
-        for(let r = 0; r < brickRowCount; r++) {
-            if(bricks[c][r].status == 1) {
-            let brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
-            let brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
-            bricks [c][r].x = brickX;
-            bricks [c][r].y = brickY;
+    for(let column = 0; column < brickColumnCount; column++) {
+        for(let row = 0; row < brickRowCount; row++) {
+            if(bricks[column][row].status == 1) {
+            let brickX = (column*(brickWidth+brickPadding))+brickOffsetLeft;
+            let brickY = (row*(brickHeight+brickPadding))+brickOffsetTop;
+            bricks[column][row].x = brickX;
+            bricks[column][row].y = brickY;
             ctx.beginPath();
             ctx.rect(brickX, brickY, brickWidth, brickHeight);
             ctx.fillStyle = "#0095DD";
@@ -160,18 +162,30 @@ function togglePause() {
         paused = false;
     }
 }
- 
+
 // detect collision
 
 function collisionDetection() {
-    for(let c = 0; c < brickColumnCount; c++) {
-        for(let r = 0; r < brickRowCount; r++) {
-            let collisionBrick = bricks[c][r];
-            if(collisionBrick.status == 1) {
-            if(x > collisionBrick.x && x < collisionBrick.x+brickWidth && y > collisionBrick.y && y < collisionBrick.y+brickHeight) {
-                dy = -dy;
-                collisionBrick.status = 0;
-                score++;
+    for(let column = 0; column < brickColumnCount; column++) {
+        for(let row = 0; row < brickRowCount; row++) {
+            var collisionBrick = bricks[column][row];
+            if(collisionBrick.status == 1 && collisionBrick.powerUp == 0) {
+                if(x > collisionBrick.x && x < collisionBrick.x+brickWidth && y > collisionBrick.y && y < collisionBrick.y+brickHeight) {
+                    dy = -dy;
+                    collisionBrick.status = 0;
+                    score++;
+                if (score == brickRowCount * brickColumnCount) {
+                    alert("YOU WIN, CONGRATULATIONS!");
+                    document.location.reload();
+                    }
+                }
+            }
+            if(collisionBrick.status == 1 && collisionBrick.powerUp == 1) {
+                if(x > collisionBrick.x && x < collisionBrick.x+brickWidth && y > collisionBrick.y && y < collisionBrick.y+brickHeight) {
+                    dy = -dy;
+                    collisionBrick.status = 0;
+                    score++;
+                    alert("powerup was hit.");
                 if (score == brickRowCount * brickColumnCount) {
                     alert("YOU WIN, CONGRATULATIONS!");
                     document.location.reload();
@@ -207,7 +221,7 @@ function draw() {
     drawScore();
     drawLives();
     collisionDetection();
-
+    
     if(y + dy < ballRadius) {
         dy = -dy;
     } else if (y + dy > canvas.height-ballRadius) {
