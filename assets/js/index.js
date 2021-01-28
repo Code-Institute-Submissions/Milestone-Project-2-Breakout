@@ -48,7 +48,7 @@ let powerUpOffsetTop = 25;
 // variables to make the powerup move
 
 let powerUpX = 0;
-let powerupY = 0;
+let powerUpY = 0;
 let dPowerUpY = 2;
 
 // variables score
@@ -297,9 +297,9 @@ function draw() {
         }
     } 
 
-    if(collisionBrick.status === 0 && collisionBrick.powerUp === 1 ) {
+    // write correct condition to drop powerup the brick should be hit 
         powerUpY += dPowerUpY;
-    }
+    
          
         x += dx;
         y += dy;
