@@ -51,6 +51,10 @@ let powerUpX = 0;
 let powerUpY = 0;
 let dPowerUpY = 2;
 
+// variables to make the powerup drop
+
+let drop = false;
+
 // variables score
 
 let score = 0;
@@ -138,13 +142,13 @@ function tracePowerUp() {
 
 tracePowerUp();
 
-function drawPowerUp() {
-    ctx.beginPath();
-    ctx.rect(powerUpX, powerUpY, powerUpWidth, powerUpHeight);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-}
+    function drawPowerUp() {
+        ctx.beginPath();
+        ctx.rect(powerUpX, powerUpY, powerUpWidth, powerUpHeight);
+        ctx.fillStyle = "#0095DD";
+        ctx.fill();
+        ctx.closePath();
+    }
 
 // gamecontrols
 
@@ -215,19 +219,23 @@ function collisionDetection() {
                     dy = -dy;
                     collisionBrick.status = 0;
                     score++;
+                if(collisionBrick.status === 0 && collisionBrick.powerUp === 1) {
+                    drop = true;
+                } else if (collisionBrick.status === 0 && collisionBrick.powerUp === 0) {
+                    drop = false;
+                }
+                console.log(drop);
                 if (score == brickRowCount * brickColumnCount) {
                     alert("YOU WIN, CONGRATULATIONS!");
                     document.location.reload();
                     }
                 }
             }
-            if(collisionBrick.powerUp === 1) {
-                drawPowerUp();
-            }
         }
     }
 }
 
+// console.log(drop);
 
 // score board and lives
 
@@ -255,8 +263,7 @@ function draw() {
     drawLives();
     collisionDetection();
     drawPowerUp();
-
-
+    
     if(y + dy < ballRadius) {
         dy = -dy;
     } else if (y + dy > canvas.height-ballRadius) {
@@ -295,12 +302,12 @@ function draw() {
         if (paddleX < 0) {
             paddleX = 0;
         }
-    } 
+    }
 
-    // write correct condition to drop powerup the brick should be hit 
+    if(drop){
         powerUpY += dPowerUpY;
-    
-         
+    }
+
         x += dx;
         y += dy;
 
