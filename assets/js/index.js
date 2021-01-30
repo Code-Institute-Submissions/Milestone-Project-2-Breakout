@@ -230,19 +230,16 @@ function collisionDetection() {
                 if (x > collisionBrick.x && x < collisionBrick.x + brickWidth && y > collisionBrick.y && y < collisionBrick.y + brickHeight) {
                     dy = -dy;
                     collisionBrick.status = 0;
-                    score++;
-                    
-                    if (collisionBrick.status === 0 && collisionBrick.powerUp === 1){
+                    score++; 
+                    if (collisionBrick.powerUp === 1) {
                         drop = true;
-                    } else {
-                        drop = false;
-                    }
-                    
+                    } 
                 }
                 if (score == brickRowCount * brickColumnCount) {
                     alert("YOU WIN, CONGRATULATIONS!");
                     document.location.reload();
                 }
+
             }
         }
     }
@@ -337,12 +334,17 @@ function draw() {
         }
 
         
-        while (drop && powerUpY < canvas.height) {
+        if (drop && powerUpY < canvas.height) {
             powerUpY += dPowerUpY;
+        } 
+
+        if (powerUpY > canvas.height) {
+            drop = false;
         }
+
         
-       
-        console.log(powerUpY + " vs " + canvas.height + " so drop = " + drop);
+        console.log(drop);
+        console.log(powerUpY + " < " + canvas.height);
 
         x += dx;
         y += dy;
