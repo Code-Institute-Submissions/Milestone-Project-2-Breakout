@@ -51,9 +51,16 @@ let powerUpX = 0;
 let powerUpY = 0;
 let dPowerUpY = 2;
 
+// variables to count powerup
+
+let powerUpCount = 0;
+const powerUpLimit = 3;
+
 // variables to make the powerup drop
 
-let drop = false;
+let drop1 = false;
+let drop2 = false;
+let drop3 = false;
 
 // variables score
 
@@ -86,20 +93,35 @@ for (let column = 1; column <= brickColumnCount; column++) {
 // generate powerup
 
 function generatePowerUp() {
+for(powerUpCount = 0; powerUpCount < powerUpLimit; powerUpCount++) {
     let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
     let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
-    bricks[powerUpColumn][powerUpRow] = { x: 0, y: 0, status: 1, powerUp: 1 };
+    bricks[powerUpColumn][powerUpRow] = { x: 0, y: 0, status: 1, powerUp: 1, powerUpCount: powerUpCount, powerUpKind: 0, powerUpActive: 1 };
     console.log(powerUpColumn + " " + powerUpRow);
+    console.log(bricks[powerUpColumn][powerUpRow]);
     for (var column = 1; column <= brickColumnCount; column++) {
         for (let row = 1; row <= brickRowCount; row++) {
-            if (bricks[column][row].powerUp === 1) {
-                powerUpX = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
-                powerUpY = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
-                bricks[column][row].x = powerUpX;
-                bricks[column][row].y = powerUpY;
+            if (bricks[column][row].powerUp === 1 && bricks[column][row].powerUpCount === 0) {
+                powerUp1X = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
+                powerUp1Y = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
+                bricks[column][row].x = powerUp1X;
+                bricks[column][row].y = powerUp1Y;
+            }
+            if (bricks[column][row].powerUp === 1 && bricks[column][row].powerUpCount === 1) {
+                powerUp2X = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
+                powerUp2Y = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
+                bricks[column][row].x = powerUp2X;
+                bricks[column][row].y = powerUp2Y;
+            }
+            if (bricks[column][row].powerUp === 1 && bricks[column][row].powerUpCount === 2) {
+                powerUp3X = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
+                powerUp3Y = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
+                bricks[column][row].x = powerUp3X;
+                bricks[column][row].y = powerUp3Y;
             }
         }
     }
+}
 }
 
 // drawing on the canvas
@@ -138,25 +160,25 @@ function drawBricks() {
     }
 }
 
-/*
-function tracePowerUp() {
-    for (var column = 1; column <= brickColumnCount; column++) {
-        for (let row = 1; row <= brickRowCount; row++) {
-            if (bricks[column][row].powerUp === 1) {
-                powerUpX = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
-                powerUpY = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
-                bricks[column][row].x = powerUpX;
-                bricks[column][row].y = powerUpY;
-            }
-        }
-    }
-    console.log("Powerup location: " + powerUpX + " " + powerUpY);
-}
-*/
-
-function drawPowerUp() {
+function drawPowerUp1() {
     ctx.beginPath();
-    ctx.rect(powerUpX, powerUpY, powerUpWidth, powerUpHeight);
+    ctx.rect(powerUp1X, powerUp1Y, powerUpWidth, powerUpHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawPowerUp2() {
+    ctx.beginPath();
+    ctx.rect(powerUp2X, powerUp2Y, powerUpWidth, powerUpHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawPowerUp3() {
+    ctx.beginPath();
+    ctx.rect(powerUp3X, powerUp3Y, powerUpWidth, powerUpHeight);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
@@ -231,9 +253,16 @@ function collisionDetection() {
                     dy = -dy;
                     collisionBrick.status = 0;
                     score++; 
-                    if (collisionBrick.powerUp === 1) {
-                        drop = true;
-                    } 
+                    if (collisionBrick.powerUp === 1 && collisionBrick.powerUpCount === 0) {
+                        drop1 = true;
+                    }
+                    if (collisionBrick.powerUp === 1 && collisionBrick.powerUpCount === 1) {
+                        drop2 = true;
+                    }
+                    if (collisionBrick.powerUp === 1 && collisionBrick.powerUpCount === 2) {
+                        drop3 = true;
+                    }
+
                 }
                 if (score == brickRowCount * brickColumnCount) {
                     alert("YOU WIN, CONGRATULATIONS!");
@@ -244,27 +273,6 @@ function collisionDetection() {
         }
     }
 }
-
-
-// detect power up
-
-/*
-function powerUpDetection() {
-    setInterval(function(){
-    for (let column = 1; column <= brickColumnCount; column++) {
-        for (let row = 1; row <= brickRowCount; row++) {
-            collisionBrick = bricks[column][row];
-            if (collisionBrick.powerUp === 1) {
-                drop = true;
-            } else {
-                drop = false;
-            }
-        }
-    }
-    },5000);
-    
-}
-*/
 
 // score board and lives
 
@@ -286,7 +294,9 @@ function draw() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
-    drawPowerUp();
+    drawPowerUp1();
+    drawPowerUp2();
+    drawPowerUp3();
     drawBall();
     drawPaddle();
     drawScore();
@@ -313,6 +323,36 @@ function draw() {
         }
     }
 
+    if (drop1 && powerUp1Y + dPowerUpY > canvas.height) {
+        if(drop1 && powerUp1X > paddleX && powerUp1X < paddleX + paddleWidth) {
+            powerUp1Active = true;
+            console.log(powerUp1Active);
+        } else {
+            powerUp1Active = false;
+            console.log(powerUp1Active);
+        }
+    }
+
+    if (drop2 && powerUp2Y + dPowerUpY > canvas.height) {
+        if(drop2 && powerUp2X > paddleX && powerUp2X < paddleX + paddleWidth) {
+            powerUp2Active = true;
+            console.log(powerUp2Active);
+        } else {
+            powerUp2Active = false;
+            console.log(powerUp2Active);
+        }
+    }
+
+    if (drop3 && powerUp3Y + dPowerUpY > canvas.height) {
+        if(drop3 && powerUp3X > paddleX && powerUp3X < paddleX + paddleWidth) {
+            powerUp3Active = true;
+            console.log(powerUp3Active);
+        } else {
+            powerUp3Active = false;
+            console.log(powerUp3Active);
+        }
+    }
+
     if (paused) {
 
         if (x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
@@ -334,17 +374,29 @@ function draw() {
         }
 
         
-        if (drop && powerUpY < canvas.height) {
-            powerUpY += dPowerUpY;
+        if (drop1 && powerUp1Y < canvas.height) {
+            powerUp1Y += dPowerUpY;
         } 
 
-        if (powerUpY > canvas.height) {
-            drop = false;
+         if (drop2 && powerUp2Y < canvas.height) {
+            powerUp2Y += dPowerUpY;
+        } 
+
+         if (drop3 && powerUp3Y < canvas.height) {
+            powerUp3Y += dPowerUpY;
+        } 
+
+        if (powerUp1Y > canvas.height) {
+            drop1 = false;
         }
 
-        
-        console.log(drop);
-        console.log(powerUpY + " < " + canvas.height);
+        if (powerUp2Y > canvas.height) {
+            drop2 = false;
+        }
+
+        if (powerUp3Y > canvas.height) {
+            drop3 = false;
+        }
 
         x += dx;
         y += dy;
@@ -355,5 +407,7 @@ function draw() {
 
 }
 
+
 generatePowerUp();
 draw();
+
