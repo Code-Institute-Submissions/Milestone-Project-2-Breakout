@@ -1,341 +1,147 @@
-// variables for enabling rendering graphics
+// game parameters
 
-let canvas = document.getElementById("gameCanvas");
-canvas.width = canvas.getBoundingClientRect().width;
-canvas.height = canvas.getBoundingClientRect().height;
-let ctx = canvas.getContext("2d");
+const HEIGHT = 600; // PIXELS
+const PADDLE_SPEED = 0.7; // FRACTION OF SCREEN WIDTH PER SECOND
 
-// variables to make the ball move
+// derived dimension
+const WIDTH =  HEIGHT * 1.3;
+const WALL = WIDTH / 300;
+const PADDLE_HEIGHT = WALL;
+const PADDLE_WIDTH = PADDLE_HEIGHT * 30; 
 
-let x = canvas.width / 2;
-let y = canvas.height - 30;
-let dx = 3;
-let dy = -3;
+// colors
+const COLOR_BACKGROUND = "black";
+const COLOR_WALL = "#0095DD";
+const COLOR_PADDLE = "#0095DD";
 
-// variables to adjust collision frame
-
-let ballRadius = 3;
-
-// variables to move the paddle
-
-let paddleHeight = 3;
-let paddleWidth = 75;
-let paddleX = (canvas.width - paddleWidth) / 2;
-
-// variables to control the paddle
-
-let rightPressed = false;
-let leftPressed = false;
-
-// variables to create the brick wall
-
-let brickRowCount = 5;
-let brickColumnCount = 10;
-let brickWidth = 50;
-let brickHeight = 10;
-let brickPadding = 5;
-let brickOffsetTop = 10;
-let brickOffsetLeft = 25;
-
-// variables to create powerups
-
-let powerUpWidth = 5;
-let powerUpHeight = 5;
-let powerUpPadding = 5;
-let powerUpOffsetLeft = 20;
-let powerUpOffsetTop = 25;
-
-// variables to make the powerup move
-
-let powerUpX = 0;
-let powerUpY = 0;
-let dPowerUpY = 2;
-
-// variables to count powerup
-
-let powerUpCount = 0;
-const powerUpLimit = 3;
-
-// variables to make the powerup drop
-
-let PowerUpInPlay = false;
-let drop1 = false;
-let drop2 = false;
-let drop3 = false;
-
-// variables score
-
-let score = 0;
-
-// variables lives
-
-let lives = 3;
-
-// variables start / pause
-
-let paused = false;
-
-// variables detection
-
-let powerUpColumn;
-let powerUpRow;
-
-// creating the two dimensional array for the bricks
-
-let bricks = [];
-
-for (let column = 1; column <= brickColumnCount; column++) {
-    bricks[column] = [];
-    for (let row = 1; row <= brickRowCount; row++) {
-        bricks[column][row] = { x: 0, y: 0, status: 1, powerUp: 0 };
-    }
+// definitions
+const Direction = {
+    LEFT: 0,
+    RIGHT: 1,
+    STOP: 2
 }
 
-// drawing on the canvas
+// game canvas
+var canvas = document.createElement("canvas");
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
+document.body.appendChild(canvas);
 
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+// set up the context
+var ctx = canvas.getContext("2d");
+ctx.lineWidth = WALL;
+
+// game variables
+var paddle;
+
+// start a new game
+newGame();
+
+// event listeners
+document.addEventListener("keydown", keyDown);
+document.addEventListener("keyup", keyUp);
+
+// set up game loop
+var timeDelta, timeLast;
+requestAnimationFrame(loop);
+
+function loop(timeNow) {
+    if (!timeLast) {
+        timeLast = timeNow;
+    }
+
+    // calculate time difference
+    timeDelta = (timeNow - timeLast) / 1000; // divided by thousand to set it in s instead of ms
+    timeLast = timeNow;
+
+    //update
+    updatePaddle(timeDelta);
+
+    //draw
+    drawBackGround();
+    drawWalls();
+    drawPaddle();
+
+    //call the next loop
+    requestAnimationFrame(loop);
+}
+
+function drawBackGround() {
+    ctx.fillStyle = COLOR_BACKGROUND;
+    ctx.fillRect(0 , 0, canvas.width, canvas.height);
 }
 
 function drawPaddle() {
+    ctx.fillStyle = COLOR_PADDLE;
+    ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
+}
+
+function drawWalls() {
+    let halfWall = WALL * 0.5;
+    ctx.strokeStyle = COLOR_WALL;
     ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
+    ctx.moveTo(halfWall, HEIGHT);
+    ctx.lineTo(halfWall, halfWall);
+    ctx.lineTo(WIDTH - halfWall, halfWall);
+    ctx.lineTo(WIDTH - halfWall, HEIGHT);
+    ctx.stroke();
 }
 
-function drawBricks() {
-    for (var column = 1; column <= brickColumnCount; column++) {
-        for (let row = 1; row <= brickRowCount; row++) {
-            if (bricks[column][row].status === 1) {
-                let brickX = (column * (brickWidth + brickPadding) - brickOffsetLeft);
-                let brickY = (row * (brickHeight + brickPadding) + brickOffsetTop);
-                bricks[column][row].x = brickX;
-                bricks[column][row].y = brickY;
-                ctx.beginPath();
-                ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                ctx.fillStyle = "#0095DD";
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
-    }
-}
-
-// generate powerup
-
-function generatePowerUp() {
-    let powerUpColumn = Math.floor(Math.random() * brickColumnCount) + 1;
-    let powerUpRow = Math.floor(Math.random() * brickRowCount) + 1;
-    bricks[powerUpColumn][powerUpRow] = { x: 0, y: 0, status: 1, powerUp: 1 };
-    console.log(powerUpColumn + " " + powerUpRow);
-    console.log(bricks[powerUpColumn][powerUpRow]);
-    for (var column = 1; column <= brickColumnCount; column++) {
-        for (let row = 1; row <= brickRowCount; row++) {
-            if (bricks[column][row].powerUp === 1) {
-                powerUp1X = (column * (brickWidth + brickPadding) + ((brickWidth / 2) - (powerUpWidth / 2)) - brickOffsetLeft);
-                powerUp1Y = (row * (brickHeight + brickPadding) + ((brickHeight / 2) - (powerUpHeight / 2)) + brickOffsetTop);
-                bricks[column][row].x = powerUp1X;
-                bricks[column][row].y = powerUp1Y;
-            }
-        }
-    }
-}
-
-// draw powerup
-
-function drawPowerUp() {
-    ctx.beginPath();
-    ctx.rect(powerUp1X, powerUp1Y, powerUpWidth, powerUpHeight);
-    ctx.fillStyle = "#0095DD";
-    ctx.fill();
-    ctx.closePath();
-    }
-
-
-// gamecontrols
-
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-document.addEventListener("mousemove", mouseMoveHandler, false);
-
-function keyDownHandler(control) {
-    switch (control.code) {
-        case "Right":
-            rightPressed = true;
+function keyDown(event) {
+    switch (event.keyCode) {
+        case 37: //left arrow for moving paddle to the left
+            movePaddle(Direction.LEFT);
             break;
-        case "ArrowRight":
-            rightPressed = true;
+        case 39: //right arrow for moving paddle to the right
+            movePaddle(Direction.RIGHT);
             break;
-        case "Left":
-            leftPressed = true;
-            break;
-        case "ArrowLeft":
-            leftPressed = true;
-            break;
-        case "Space":
-            togglePause();
     }
 }
 
-function keyUpHandler(control) {
-    switch (control.code) {
-        case "Right":
-            rightPressed = false;
+function keyUp(event) {
+    switch (event.keyCode) {
+        case 37: //left arrow for stop moving paddle to the left
+        case 39: //right arrow for stop moving paddle to the right
+            movePaddle(Direction.STOP);
             break;
-        case "ArrowRight":
-            rightPressed = false;
+    }
+}
+
+function movePaddle(direction) {
+    switch (direction) {
+        case Direction.LEFT:
+            paddle.xv = -paddle.speed;
             break;
-        case "Left":
-            leftPressed = false;
+        case Direction.RIGHT:
+            paddle.xv = paddle.speed;
             break;
-        case "ArrowLeft":
-            leftPressed = false;
+        case Direction.STOP:
+            paddle.xv = 0;
+            break;
     }
 }
 
-function mouseMoveHandler(control) {
-    let relativeX = control.clientX;
-    if (relativeX > paddleWidth / 2 && relativeX < canvas.width - paddleWidth / 2) {
-        paddleX = relativeX - paddleWidth / 2;
-    }
+function newGame() {
+    paddle = new Paddle();
 }
 
-// starting / pausing the game
+function updatePaddle(delta) {
+    paddle.x += paddle.xv * delta;
 
-function togglePause() {
-    if (!paused) {
-        paused = true;
-    } else if (paused) {
-        paused = false;
-    }
-}
-
-// detect collision
-
-function collisionDetection() {
-    for (let column = 1; column <= brickColumnCount; column++) {
-        for (let row = 1; row <= brickRowCount; row++) {
-            collisionBrick = bricks[column][row];
-            if (collisionBrick.status === 1) {
-                if (x > collisionBrick.x && x < collisionBrick.x + brickWidth && y > collisionBrick.y && y < collisionBrick.y + brickHeight) {
-                    dy = -dy;
-                    collisionBrick.status = 0;
-                    if(collisionBrick.powerUp === 1) {
-                        drop1 = true;
-                    }
-                    score++; 
-                }
-                if (score == brickRowCount * brickColumnCount) {
-                    alert("YOU WIN, CONGRATULATIONS!");
-                    document.location.reload();
-                }
-
-            }
-        }
-    }
-}
-
-// score board and lives
-
-function drawScore() {
-    ctx.font = "bold 12px Arial";
-    ctx.fillStyle = "#0095DD";
-    ctx.fillText("SCORE: " + score, 30, 20);
-}
-
-function drawLives() {
-    ctx.font = "bold 12px Arial";
-    ctx.fillStyle = "0095DD";
-    ctx.fillText("LIVES: " + lives, canvas.width - 75, 20);
-}
-
-// Here all game functionalities come together
-
-function draw() {
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBricks();
-    drawBall();
-    drawPaddle();
-    drawScore();
-    drawLives();
-    collisionDetection();
-    drawPowerUp();
-      
-    if (y + dy < ballRadius) {
-        dy = -dy;
-    } else if (y + dy > canvas.height - ballRadius) {
-        if (x > paddleX && x < paddleX + paddleWidth) {
-            dy = -dy;
-        } else {
-            lives--;
-            if (!lives) {
-                alert("GAME OVER");
-                document.location.reload();
-            } else {
-                x = canvas.width / 2;
-                y = canvas.height - 30;
-                dx = 4;
-                dy = -4;
-                paddleX = (canvas.width - paddleWidth) / 2;
-            }
-        }
+    // stop paddle at walls
+    if (paddle.x < WALL + paddle.width * 0.5) {
+        paddle.x = WALL + paddle.width * 0.5;
+    } else if (paddle.x > canvas.width - WALL - paddle.width * 0.5) {
+        paddle.x = canvas.width - WALL - paddle.width * 0.5;
     }
     
-    if (drop1 && powerUp1Y + dPowerUpY > canvas.height) {
-        if(drop1 && powerUp1X > paddleX && powerUp1X < paddleX + paddleWidth) {
-            powerUp1Active = true;
-            console.log(powerUp1Active);
-        } else {
-            powerUp1Active = false;
-            console.log(powerUp1Active);
-        }
-    }
-    
-    if (paused) {
-
-        if (x + dx < ballRadius || x + dx > canvas.width - ballRadius) {
-            dx = -dx;
-        }
-
-        if (rightPressed) {
-            paddleX += 5;
-            if (paddleX + paddleWidth > canvas.width) {
-                paddleX = canvas.width - paddleWidth;
-            }
-        }
-
-        if (leftPressed) {
-            paddleX -= 5;
-            if (paddleX < 0) {
-                paddleX = 0;
-            }
-        }
-
-        
-        if (drop1 && powerUp1Y < canvas.height) {
-            powerUp1Y += dPowerUpY;
-        } 
-
-        if (powerUp1Y > canvas.height) {
-            drop1 = false;
-        }
-        
-        x += dx;
-        y += dy;
-
-    }
-
-    requestAnimationFrame(draw);
-
 }
 
-generatePowerUp();
-draw();
-
+function Paddle() {
+    this.width = PADDLE_WIDTH;
+    this.height = PADDLE_HEIGHT;
+    this.x = canvas.width / 2;
+    this.y = canvas.height - this.height * 3;
+    this.speed = PADDLE_SPEED * WIDTH; 
+    this.xv = 0;
+}
