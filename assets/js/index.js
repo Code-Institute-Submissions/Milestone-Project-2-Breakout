@@ -1,18 +1,21 @@
 // game parameters
 
+const BALL_SPEED = 0.5; // STARTING BALL SPEED AS A FRACTION OF SCREEN WIDTH PER SECOND
 const HEIGHT = 600; // PIXELS
 const PADDLE_SPEED = 0.7; // FRACTION OF SCREEN WIDTH PER SECOND
 
 // derived dimension
 const WIDTH =  HEIGHT * 1.3;
 const WALL = WIDTH / 300;
-const PADDLE_HEIGHT = WALL;
-const PADDLE_WIDTH = PADDLE_HEIGHT * 30; 
+const BALL_RADIUS = 3;
+const PADDLE_HEIGHT = 5;
+const PADDLE_WIDTH = 75;
 
 // colors
 const COLOR_BACKGROUND = "black";
 const COLOR_WALL = "#0095DD";
 const COLOR_PADDLE = "#0095DD";
+const COLOR_BALL = "#0095DD";
 
 // definitions
 const Direction = {
@@ -32,7 +35,7 @@ var ctx = canvas.getContext("2d");
 ctx.lineWidth = WALL;
 
 // game variables
-var paddle;
+var ball, paddle;
 
 // start a new game
 newGame();
@@ -56,14 +59,27 @@ function loop(timeNow) {
 
     //update
     updatePaddle(timeDelta);
+    updateBall(timeDelta);
+
+    console.log(ball.y > paddle.y - paddle.height * 0.5 - ball.radius * 0.5);
+    console.log(ball.y < paddle.y);
+    console.log(ball.x > paddle.x - paddle.width * 0.5 - ball.radius * 0.5);
+    console.log(ball.x < paddle.x + paddle.width * 0.5 + ball.radius * 0.5);
 
     //draw
     drawBackGround();
     drawWalls();
     drawPaddle();
+    drawBall();
 
     //call the next loop
     requestAnimationFrame(loop);
+}
+
+function applyBallSpeed(angle) {
+    // update x and y velocities of the ball
+    ball.xv = ball.speed * Math.cos(angle);
+    ball.yv = -ball.speed * Math.sin(angle);
 }
 
 function drawBackGround() {
@@ -74,6 +90,14 @@ function drawBackGround() {
 function drawPaddle() {
     ctx.fillStyle = COLOR_PADDLE;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
+}
+
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = COLOR_BALL;
+    ctx.fill();
+    ctx.closePath();
 }
 
 function drawWalls() {
@@ -89,10 +113,13 @@ function drawWalls() {
 
 function keyDown(event) {
     switch (event.keyCode) {
-        case 37: //left arrow for moving paddle to the left
+        case 32: // spacebar to serve the ball
+            serve();
+            break;
+        case 37: // left arrow for moving paddle to the left
             movePaddle(Direction.LEFT);
             break;
-        case 39: //right arrow for moving paddle to the right
+        case 39: // right arrow for moving paddle to the right
             movePaddle(Direction.RIGHT);
             break;
     }
@@ -100,8 +127,8 @@ function keyDown(event) {
 
 function keyUp(event) {
     switch (event.keyCode) {
-        case 37: //left arrow for stop moving paddle to the left
-        case 39: //right arrow for stop moving paddle to the right
+        case 37: // left arrow for stop moving paddle to the left
+        case 39: // right arrow for stop moving paddle to the right
             movePaddle(Direction.STOP);
             break;
     }
@@ -123,6 +150,51 @@ function movePaddle(direction) {
 
 function newGame() {
     paddle = new Paddle();
+    ball = new Ball();
+}
+
+function serve() {
+
+    // ball already in motion
+    if (ball.yv != 0) {
+        return;
+    }
+
+    // random angle
+    let angle = Math.random() * Math.PI / 2 + Math.PI / 4;
+    applyBallSpeed(angle);
+}
+
+function updateBall(delta) {
+    ball.x += ball.xv * delta;
+    ball.y += ball.yv * delta;
+
+    // bounce the ball off walls
+    if (ball.x < WALL + ball.radius * 0.5) {
+        ball.x = WALL + ball.radius * 0.5;
+        ball.xv = -ball.xv;
+    } else if (ball.x > canvas.width - WALL - ball.radius * 0.5) {
+        ball.x = canvas.width - WALL - ball.radius * 0.5;
+        ball.xv = -ball.xv;
+    } else if (ball.y <  WALL + ball.radius * 0.5) {
+        ball.y <  WALL + ball.radius * 0.5;
+        ball.yv = -ball.yv;
+    }
+
+    // bounce the ball off the paddle 
+    if (ball.y > paddle.y - paddle.height * 0.5 - ball.radius * 0.5
+        && ball.y < paddle.y
+        && ball.x > paddle.x - paddle.width * 0.5 - ball.radius * 0.5
+        && ball.x < paddle.x + paddle.width * 0.5 + ball.radius * 0.5
+    ) {
+        ball.y = paddle.y - paddle.height * 0.5 - ball.radius * 0.5;
+        ball.yv = -ball.yv;
+    }
+    
+    // move the stationary ball with paddle
+    if (ball.yv == 0) {
+        ball.x = paddle.x;
+    }
 }
 
 function updatePaddle(delta) {
@@ -141,7 +213,17 @@ function Paddle() {
     this.width = PADDLE_WIDTH;
     this.height = PADDLE_HEIGHT;
     this.x = canvas.width / 2;
-    this.y = canvas.height - this.height * 3;
+    this.y = canvas.height - this.height;
     this.speed = PADDLE_SPEED * WIDTH; 
     this.xv = 0;
 }
+
+function Ball() {
+    this.radius = BALL_RADIUS;
+    this.x = paddle.x;
+    this.y = paddle.y - paddle.height - this.radius;
+    this.speed = BALL_SPEED * WIDTH; 
+    this.xv = 0;
+    this.yv = 0;
+}
+
