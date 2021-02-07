@@ -1,15 +1,10 @@
 // game parameters
 
-const BALL_SPEED = 0.5; // STARTING BALL SPEED AS A FRACTION OF SCREEN WIDTH PER SECOND
-const HEIGHT = 600; // PIXELS
-const PADDLE_SPEED = 0.7; // FRACTION OF SCREEN WIDTH PER SECOND
-
-// derived dimension
-const WIDTH =  HEIGHT * 1.3;
-const WALL = WIDTH / 300;
-const BALL_RADIUS = 3;
-const PADDLE_HEIGHT = 5;
-const PADDLE_WIDTH = 75;
+const BALL_SPEED = 0.5; // Starting ball speed as a fraction of screen height per second
+const BALL_SPIN = 0.2; // Ball deflection off the paddle (0 = no spin, 1 =  high spin)
+const PADDLE_WIDTH = 0.1; // Paddle width as a fraction of screen width
+const PADDLE_SPEED = 0.5; // Paddle speed as a fraction of screen width per second
+const WALL = 0.02 // Wall/ball/paddle size as a fraction of shortest screen dimension
 
 // colors
 const COLOR_BACKGROUND = "black";
@@ -24,15 +19,19 @@ const Direction = {
     STOP: 2
 }
 
-// game canvas
+// set up the game canvas and context
 var canvas = document.createElement("canvas");
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
 document.body.appendChild(canvas);
-
-// set up the context
 var ctx = canvas.getContext("2d");
-ctx.lineWidth = WALL;
+
+// derived dimension
+var height, width, wall;
+height = window.innerHeight; // PIXELS
+width = window.innerWidth;
+wall = WALL * (height < width ? height : width);
+canvas.width = width;
+canvas.height = height;
+ctx.lineWidth = wall;
 
 // game variables
 var ball, paddle;
@@ -61,11 +60,6 @@ function loop(timeNow) {
     updatePaddle(timeDelta);
     updateBall(timeDelta);
 
-    console.log(ball.y > paddle.y - paddle.height * 0.5 - ball.radius * 0.5);
-    console.log(ball.y < paddle.y);
-    console.log(ball.x > paddle.x - paddle.width * 0.5 - ball.radius * 0.5);
-    console.log(ball.x < paddle.x + paddle.width * 0.5 + ball.radius * 0.5);
-
     //draw
     drawBackGround();
     drawWalls();
@@ -77,6 +71,14 @@ function loop(timeNow) {
 }
 
 function applyBallSpeed(angle) {
+    
+    // keep the angle between 30 and 150 degrees
+    if (angle < Math.PI / 6) {
+        angle = Math.PI / 6;
+    } else if (angle > Math.PI * 5 / 6) {
+        angle = Math.PI * 5 / 6;
+    }
+
     // update x and y velocities of the ball
     ball.xv = ball.speed * Math.cos(angle);
     ball.yv = -ball.speed * Math.sin(angle);
@@ -101,13 +103,13 @@ function drawBall() {
 }
 
 function drawWalls() {
-    let halfWall = WALL * 0.5;
+    let halfWall = wall * 0.5;
     ctx.strokeStyle = COLOR_WALL;
     ctx.beginPath();
-    ctx.moveTo(halfWall, HEIGHT);
+    ctx.moveTo(halfWall, height);
     ctx.lineTo(halfWall, halfWall);
-    ctx.lineTo(WIDTH - halfWall, halfWall);
-    ctx.lineTo(WIDTH - halfWall, HEIGHT);
+    ctx.lineTo(width - halfWall, halfWall);
+    ctx.lineTo(width - halfWall, height);
     ctx.stroke();
 }
 
@@ -153,6 +155,11 @@ function newGame() {
     ball = new Ball();
 }
 
+function outOfBounds() {
+    // TO DO
+    newGame();
+}
+
 function serve() {
 
     // ball already in motion
@@ -170,14 +177,14 @@ function updateBall(delta) {
     ball.y += ball.yv * delta;
 
     // bounce the ball off walls
-    if (ball.x < WALL + ball.radius * 0.5) {
-        ball.x = WALL + ball.radius * 0.5;
+    if (ball.x < wall + ball.radius * 0.5) {
+        ball.x = wall + ball.radius * 0.5;
         ball.xv = -ball.xv;
-    } else if (ball.x > canvas.width - WALL - ball.radius * 0.5) {
-        ball.x = canvas.width - WALL - ball.radius * 0.5;
+    } else if (ball.x > canvas.width - wall - ball.radius * 0.5) {
+        ball.x = canvas.width - wall - ball.radius * 0.5;
         ball.xv = -ball.xv;
-    } else if (ball.y <  WALL + ball.radius * 0.5) {
-        ball.y <  WALL + ball.radius * 0.5;
+    } else if (ball.y <  wall + ball.radius * 0.5) {
+        ball.y <  wall + ball.radius * 0.5;
         ball.yv = -ball.yv;
     }
 
@@ -189,8 +196,18 @@ function updateBall(delta) {
     ) {
         ball.y = paddle.y - paddle.height * 0.5 - ball.radius * 0.5;
         ball.yv = -ball.yv;
+
+        // modify the angle based off ball spin
+        let angle = Math.atan2(-ball.yv, ball.xv);
+        angle += (Math.random() * Math.PI / 2 - Math.PI / 4) * BALL_SPIN;
+        applyBallSpeed(angle);
     }
-    
+
+    // handle out of bounds
+    if (ball.y > canvas.height) {
+        outOfBounds();
+    }
+
     // move the stationary ball with paddle
     if (ball.yv == 0) {
         ball.x = paddle.x;
@@ -201,28 +218,28 @@ function updatePaddle(delta) {
     paddle.x += paddle.xv * delta;
 
     // stop paddle at walls
-    if (paddle.x < WALL + paddle.width * 0.5) {
-        paddle.x = WALL + paddle.width * 0.5;
-    } else if (paddle.x > canvas.width - WALL - paddle.width * 0.5) {
-        paddle.x = canvas.width - WALL - paddle.width * 0.5;
+    if (paddle.x < wall + paddle.width * 0.5) {
+        paddle.x = wall + paddle.width * 0.5;
+    } else if (paddle.x > canvas.width - wall - paddle.width * 0.5) {
+        paddle.x = canvas.width - wall - paddle.width * 0.5;
     }
     
 }
 
 function Paddle() {
-    this.width = PADDLE_WIDTH;
-    this.height = PADDLE_HEIGHT;
+    this.width = PADDLE_WIDTH * width;
+    this.height = wall * 1.25;
     this.x = canvas.width / 2;
-    this.y = canvas.height - this.height;
-    this.speed = PADDLE_SPEED * WIDTH; 
+    this.y = canvas.height - this.height * 2;
+    this.speed = PADDLE_SPEED * width; 
     this.xv = 0;
 }
 
 function Ball() {
-    this.radius = BALL_RADIUS;
+    this.radius = wall / 2;
     this.x = paddle.x;
-    this.y = paddle.y - paddle.height - this.radius;
-    this.speed = BALL_SPEED * WIDTH; 
+    this.y = paddle.y - paddle.height;
+    this.speed = BALL_SPEED * height; 
     this.xv = 0;
     this.yv = 0;
 }
