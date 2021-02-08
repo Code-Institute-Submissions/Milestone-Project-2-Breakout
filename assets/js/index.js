@@ -29,7 +29,7 @@ var height, width, wall;
 setDimensions();
 
 // game variables
-var ball, paddle;
+var ball, paddle, touchX;
 
 // start a new game
 newGame();
@@ -153,6 +153,7 @@ function movePaddle(direction) {
 function newGame() {
     paddle = new Paddle();
     ball = new Ball();
+    touchX = null;
 }
 
 function outOfBounds() {
@@ -184,33 +185,25 @@ function setDimensions() {
     ball = new Ball();
 }
 
-function touch() {
-    if (!x ) {
-        movePaddle(Direction.STOP);
-    } else if (x > paddle.x) {
-        movePaddle(Direction.RIGHT);
-    } else if (x < paddle.x) {
-        movePaddle(Direction.LEFT);
-    }
-}
-
 function touchCancel(event) {
-    touch(null);
+    touchX = null;
+    movePaddle(Direction.STOP);
 }
 
 function touchEnd(event) {
-    touch(null);
+    touchX = null;
+    movePaddle(Direction.STOP);
 }
 
 function touchMove(event) {
-    touch(event.touches[0].clientX);
+    touchX = event.touches[0].clientX;
 }
 
 function touchStart(event) {
     if (serve()) {
         return;
     }
-    touch(event.touches[0].clientX);
+    touchX = event.touches[0].clientX;
 }
 
 function updateBall(delta) {
@@ -256,6 +249,19 @@ function updateBall(delta) {
 }
 
 function updatePaddle(delta) {
+    
+    // handle touch
+    if (touchX != null) {
+        if (touchX > paddle.x + wall) {
+            movePaddle(Direction.RIGHT);
+        } else if (touchX < paddle.x - wall) {
+            movePaddle(Direction.LEFT);
+        } else {
+            movePaddle(Direction.STOP);
+        }
+    }
+    
+    // move the paddle
     paddle.x += paddle.xv * delta;
 
     // stop paddle at walls
