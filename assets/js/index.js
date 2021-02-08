@@ -2,9 +2,15 @@
 
 const BALL_SPEED = 0.5; // Starting ball speed as a fraction of screen height per second
 const BALL_SPIN = 0.2; // Ball deflection off the paddle (0 = no spin, 1 =  high spin)
+const BRICK_ROWS = 8; // Starting nummer of brick rows
+const BRICK_COLUMNS = 14; // Number of brick columns
+const BRICK_GAP = 0.3; // Brick gap as a fraction of wall width
+const MARGIN = 6; // Number of empty rows above the bricks
+const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const PADDLE_WIDTH = 0.1; // Paddle width as a fraction of screen width
 const PADDLE_SPEED = 0.5; // Paddle speed as a fraction of screen width per second
 const WALL = 0.02; // Wall/ball/paddle size as a fraction of shortest screen dimension
+
 
 // colors
 const COLOR_BACKGROUND = "black";
@@ -24,15 +30,12 @@ var canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 var ctx = canvas.getContext("2d");
 
+// game variables
+var ball, bricks = [], level, paddle, touchX;
+
 // derived dimensions
 var height, width, wall;
 setDimensions();
-
-// game variables
-var ball, paddle, touchX;
-
-// start a new game
-newGame();
 
 // event listeners
 canvas.addEventListener("touchcancel", touchCancel);
@@ -64,6 +67,7 @@ function loop(timeNow) {
     drawBackGround();
     drawWalls();
     drawPaddle();
+    drawBricks();
     drawBall();
 
     //call the next loop
@@ -84,6 +88,38 @@ function applyBallSpeed(angle) {
     ball.yv = -ball.speed * Math.sin(angle);
 }
 
+function createBricks() {
+    
+    // row dimensions
+    let minY = wall;
+    let maxY = ball.y - ball.radius * 3.5;
+    let totalSpaceY = maxY - minY;
+    let totalRows = MARGIN + BRICK_ROWS + MAX_LEVEL * 2;
+    let rowH = totalSpaceY / totalRows;
+    let gap = wall * BRICK_GAP;
+    let h = rowH - gap;
+
+    // column dimensions
+    let totalSpaceX = width - wall * 2;
+    let columnW = (totalSpaceX - gap) / BRICK_COLUMNS;
+    let w = columnW - gap;
+
+    // populate the bricks array
+    bricks = [];
+    let columns = BRICK_COLUMNS;
+    let rows = BRICK_ROWS + level * 2;
+    let color, left, top;
+    for (let i = 0; i < rows; i++) {
+        bricks[i] = [];
+        color = "#0095DD";
+        top = wall + (MARGIN + i) * rowH;
+        for (let j = 0; j < columns; j++) {
+            left = wall + gap + j * columnW;
+            bricks[i][j] = new Brick(left, top, w, h, color);
+        }
+    }
+}
+
 function drawBackGround() {
     ctx.fillStyle = COLOR_BACKGROUND;
     ctx.fillRect(0 , 0, canvas.width, canvas.height);
@@ -100,6 +136,15 @@ function drawBall() {
     ctx.fillStyle = COLOR_BALL;
     ctx.fill();
     ctx.closePath();
+}
+
+function drawBricks() {
+    for (let row of bricks) {
+        for (let brick of row) {
+            ctx.fillStyle = brick.color;
+            ctx.fillRect(brick.left, brick.top, brick.w, brick.h);
+        }
+    }
 }
 
 function drawWalls() {
@@ -153,7 +198,9 @@ function movePaddle(direction) {
 function newGame() {
     paddle = new Paddle();
     ball = new Ball();
+    level = 0;
     touchX = null;
+    createBricks();
 }
 
 function outOfBounds() {
@@ -162,7 +209,6 @@ function outOfBounds() {
 }
 
 function serve() {
-
     // ball already in motion
     if (ball.yv != 0) {
         return false;
@@ -176,13 +222,12 @@ function serve() {
 
 function setDimensions() {
     height = window.innerHeight; // PIXELS
-        width = window.innerWidth;
+    width = window.innerWidth;
     wall = WALL * (height < width ? height : width);
     canvas.width = width;
     canvas.height = height;
     ctx.lineWidth = wall;
-    paddle = new Paddle();
-    ball = new Ball();
+    newGame();
 }
 
 function touchCancel(event) {
@@ -273,15 +318,6 @@ function updatePaddle(delta) {
     
 }
 
-function Paddle() {
-    this.width = PADDLE_WIDTH * width;
-    this.height = wall * 1.25;
-    this.x = canvas.width / 2;
-    this.y = canvas.height - this.height * 2;
-    this.speed = PADDLE_SPEED * width; 
-    this.xv = 0;
-}
-
 function Ball() {
     this.radius = wall / 2;
     this.x = paddle.x;
@@ -291,3 +327,21 @@ function Ball() {
     this.yv = 0;
 }
 
+function Brick(left, top, w, h, color) {
+    this.w = w;
+    this.h = h;
+    this.bot = top + h;
+    this.left = left;
+    this.right = left + w;
+    this.top = top;
+    this.color = color;
+}
+
+function Paddle() {
+    this.width = PADDLE_WIDTH * width;
+    this.height = wall * 1.25;
+    this.x = canvas.width / 2;
+    this.y = canvas.height - this.height * 2;
+    this.speed = PADDLE_SPEED * width; 
+    this.xv = 0;
+}
