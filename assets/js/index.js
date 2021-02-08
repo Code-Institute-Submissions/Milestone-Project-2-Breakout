@@ -4,7 +4,7 @@ const BALL_SPEED = 0.5; // Starting ball speed as a fraction of screen height pe
 const BALL_SPIN = 0.2; // Ball deflection off the paddle (0 = no spin, 1 =  high spin)
 const PADDLE_WIDTH = 0.1; // Paddle width as a fraction of screen width
 const PADDLE_SPEED = 0.5; // Paddle speed as a fraction of screen width per second
-const WALL = 0.02 // Wall/ball/paddle size as a fraction of shortest screen dimension
+const WALL = 0.02; // Wall/ball/paddle size as a fraction of shortest screen dimension
 
 // colors
 const COLOR_BACKGROUND = "black";
@@ -24,14 +24,9 @@ var canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 var ctx = canvas.getContext("2d");
 
-// derived dimension
+// derived dimensions
 var height, width, wall;
-height = window.innerHeight; // PIXELS
-width = window.innerWidth;
-wall = WALL * (height < width ? height : width);
-canvas.width = width;
-canvas.height = height;
-ctx.lineWidth = wall;
+setDimensions();
 
 // game variables
 var ball, paddle;
@@ -40,15 +35,20 @@ var ball, paddle;
 newGame();
 
 // event listeners
+canvas.addEventListener("touchcancel", touchCancel);
+canvas.addEventListener("touchend", touchEnd);
+canvas.addEventListener("touchmove", touchMove);
+canvas.addEventListener("touchstart", touchStart);
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
+window.addEventListener("resize", setDimensions);
 
 // set up game loop
 var timeDelta, timeLast;
 requestAnimationFrame(loop);
 
 function loop(timeNow) {
-    if (!timeLast) {
+    if (!timeLast) { 
         timeLast = timeNow;
     }
 
@@ -164,12 +164,53 @@ function serve() {
 
     // ball already in motion
     if (ball.yv != 0) {
-        return;
+        return false;
     }
 
     // random angle
     let angle = Math.random() * Math.PI / 2 + Math.PI / 4;
     applyBallSpeed(angle);
+    return true;
+}
+
+function setDimensions() {
+    height = window.innerHeight; // PIXELS
+        width = window.innerWidth;
+    wall = WALL * (height < width ? height : width);
+    canvas.width = width;
+    canvas.height = height;
+    ctx.lineWidth = wall;
+    paddle = new Paddle();
+    ball = new Ball();
+}
+
+function touch() {
+    if (!x ) {
+        movePaddle(Direction.STOP);
+    } else if (x > paddle.x) {
+        movePaddle(Direction.RIGHT);
+    } else if (x < paddle.x) {
+        movePaddle(Direction.LEFT);
+    }
+}
+
+function touchCancel(event) {
+    touch(null);
+}
+
+function touchEnd(event) {
+    touch(null);
+}
+
+function touchMove(event) {
+    touch(event.touches[0].clientX);
+}
+
+function touchStart(event) {
+    if (serve()) {
+        return;
+    }
+    touch(event.touches[0].clientX);
 }
 
 function updateBall(delta) {
