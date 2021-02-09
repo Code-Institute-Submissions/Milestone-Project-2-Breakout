@@ -62,6 +62,7 @@ function loop(timeNow) {
     //update
     updatePaddle(timeDelta);
     updateBall(timeDelta);
+    updateBricks(timeDelta);
 
     //draw
     drawBackGround();
@@ -108,10 +109,12 @@ function createBricks() {
     bricks = [];
     let columns = BRICK_COLUMNS;
     let rows = BRICK_ROWS + level * 2;
-    let color, left, top;
+    let color, left, top, rank, rankHigh;
+    rankHigh = rows * 0.5 - 1;
     for (let i = 0; i < rows; i++) {
         bricks[i] = [];
-        color = "#0095DD";
+        rank = Math.floor(i * 0.5);
+        color = getBrickColor(rank, rankHigh);
         top = wall + (MARGIN + i) * rowH;
         for (let j = 0; j < columns; j++) {
             left = wall + gap + j * columnW;
@@ -141,6 +144,9 @@ function drawBall() {
 function drawBricks() {
     for (let row of bricks) {
         for (let brick of row) {
+            if (brick == null) {
+                continue;
+            }
             ctx.fillStyle = brick.color;
             ctx.fillRect(brick.left, brick.top, brick.w, brick.h);
         }
@@ -156,6 +162,40 @@ function drawWalls() {
     ctx.lineTo(width - halfWall, halfWall);
     ctx.lineTo(width - halfWall, height);
     ctx.stroke();
+}
+
+
+// darkest blue = 0, mid blue 1 = 0.25, mid blue 2 = 0.50, light blue = 0.75
+function getBrickColor(rank, highestRank) {
+    let fraction = rank / highestRank;
+    let r, g, b;
+
+    // darkest blue to mid blue 1
+    if (fraction < 0.25) {
+        r = 0;
+        g = 106;
+        b = 157;
+    }
+
+    if (fraction > 0.25 && fraction < 0.50) {
+        r = 0;
+        g = 149;
+        b = 221;
+    }
+
+     if (fraction > 0.50 && fraction < 0.75) {
+        r = 7;
+        g = 174;
+        b = 225;
+    }
+
+    if (fraction > 0.75) {
+        r = 34;
+        g = 181;
+        b = 252;
+    }
+
+    return "rgb(" + r + ", " + g + ", " + b + ")";
 }
 
 function keyDown(event) {
@@ -284,12 +324,29 @@ function updateBall(delta) {
 
     // handle out of bounds
     if (ball.y > canvas.height) {
+        console.log("TEST");
         outOfBounds();
     }
 
     // move the stationary ball with paddle
     if (ball.yv == 0) {
         ball.x = paddle.x;
+    }
+}
+
+
+function updateBricks(delta) {
+
+    // check for ball collisions
+    OUTER: for (let i = 0; i < bricks.length; i++) {
+        for(let j = 0; j < BRICK_COLUMNS; j++) {
+            if (bricks[i][j] != null && bricks[i][j].intersect(ball)) {
+                bricks[i][j] = null;
+                ball.yv = -ball.yv;
+                // TODO SCORE
+                break OUTER;
+            }
+        }
     }
 }
 
@@ -335,6 +392,17 @@ function Brick(left, top, w, h, color) {
     this.right = left + w;
     this.top = top;
     this.color = color;
+
+    this.intersect = function(ball) {
+        let bBot = ball.y + ball.radius * 0.5;
+        let bLeft = ball.x - ball.radius * 0.5;
+        let bRight = ball.x + ball.radius * 0.5;
+        let bTop = ball.y - ball.radius * 0.5;
+        return this.left < bRight
+                && bLeft < this.right
+                && this.bot > bTop
+                && bBot > this.top;
+    }
 }
 
 function Paddle() {
