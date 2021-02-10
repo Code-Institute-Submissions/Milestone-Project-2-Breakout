@@ -1,10 +1,13 @@
 // game parameters
 
 const BALL_SPEED = 0.5; // Starting ball speed as a fraction of screen height per second
+const BALL_SPEED_MAX = 2; // Max ball speed as a multiple of starting speed
 const BALL_SPIN = 0.2; // Ball deflection off the paddle (0 = no spin, 1 =  high spin)
 const BRICK_ROWS = 8; // Starting nummer of brick rows
 const BRICK_COLUMNS = 14; // Number of brick columns
 const BRICK_GAP = 0.3; // Brick gap as a fraction of wall width
+const GAME_LIVES = 3; // Starting number of games lives
+const KEY_SCORE = "Highscore"; // Save key for local storage of high score
 const MARGIN = 6; // Number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
@@ -15,9 +18,19 @@ const WALL = 0.02; // Wall/ball/paddle size as a fraction of shortest screen dim
 
 // colors
 const COLOR_BACKGROUND = "black";
-const COLOR_WALL = "#0095DD";
+const COLOR_WALL = "black";
 const COLOR_PADDLE = "#0095DD";
 const COLOR_BALL = "#0095DD";
+const COLOR_TEXT = "#0095DD";
+
+// text
+const TEXT_FONT = "Arial";
+const TEXT_GAME_OVER = "GAME OVER";
+const TEXT_LEVEL = "LEVEL";
+const TEXT_LIVES = "LIVES";
+const TEXT_SCORE = "SCORE";
+const TEXT_SCORE_HIGH = "HIGH SCORE";
+const TEXT_WIN = "YOU WIN!";
 
 // definitions
 const Direction = {
@@ -32,7 +45,10 @@ document.body.appendChild(canvas);
 var ctx = canvas.getContext("2d");
 
 // game variables
-var ball, bricks = [], level, paddle, touchX;
+var ball, bricks = [], paddle;
+var gameOver, win;
+var level, lives, score, scoreHigh;
+var numBricks, textSize, touchX;
 
 // derived dimensions
 var height, width, wall;
@@ -61,15 +77,18 @@ function loop(timeNow) {
     timeLast = timeNow;
 
     //update
-    updatePaddle(timeDelta);
-    updateBall(timeDelta);
-    updateBricks(timeDelta);
+    if(!gameOver) {
+        updatePaddle(timeDelta);
+        updateBall(timeDelta);
+        updateBricks(timeDelta);
+    }
 
     //draw
     drawBackGround();
     drawWalls();
     drawPaddle();
     drawBricks();
+    drawText();
     drawBall();
 
     //call the next loop
@@ -92,6 +111,7 @@ function createBricks() {
     let rowH = totalSpaceY / totalRows;
     let gap = wall * BRICK_GAP;
     let h = rowH - gap;
+    textSize = rowH * MARGIN * 0.15;
 
     // column dimensions
     let totalSpaceX = width - wall * 2;
@@ -102,16 +122,19 @@ function createBricks() {
     bricks = [];
     let columns = BRICK_COLUMNS;
     let rows = BRICK_ROWS + level * 2;
-    let color, left, top, rank, rankHigh;
+    let color, left, top, rank, rankHigh, score, speedMult;
+    numBricks = columns * rows;
     rankHigh = rows * 0.5 - 1;
     for (let i = 0; i < rows; i++) {
         bricks[i] = [];
         rank = Math.floor(i * 0.5);
+        score = (rankHigh - rank) * 2 + 1;
+        speedMult = 1 + (rankHigh - rank) / rankHigh * (BALL_SPEED_MAX - 1);
         color = getBrickColor(rank, rankHigh);
         top = wall + (MARGIN + i) * rowH;
         for (let j = 0; j < columns; j++) {
             left = wall + gap + j * columnW;
-            bricks[i][j] = new Brick(left, top, w, h, color);
+            bricks[i][j] = new Brick(left, top, w, h, color, score, speedMult);
         }
     }
 }
@@ -124,6 +147,54 @@ function drawBackGround() {
 function drawPaddle() {
     ctx.fillStyle = COLOR_PADDLE;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
+}
+
+function drawText() {
+    ctx.fillStyle = COLOR_TEXT;
+
+    // dimensions
+    let labelSize = textSize * 0.9;
+    let margin = wall * 2;
+    let maxWidth = width - margin *2;
+    let maxWidth1 = maxWidth * 0.27;
+    let maxWidth2 = maxWidth * 0.2;
+    let maxWidth3 = maxWidth * 0.2;
+    let maxWidth4 = maxWidth * 0.27;
+    let x1 = margin;
+    let x2 = width * 0.4;
+    let x3 = width * 0.6;
+    let x4 = width - margin;
+    let yLabel = wall + labelSize;
+    let yValue = yLabel + textSize * 1.2;
+
+    // labels
+    ctx.font = labelSize + "px " + TEXT_FONT;
+    ctx.textAlign = "left";
+    ctx.fillText(TEXT_SCORE, x1, yLabel, maxWidth1);
+    ctx.textAlign = "center";
+    ctx.fillText(TEXT_LIVES, x2, yLabel, maxWidth2);
+    ctx.fillText(TEXT_LEVEL, x3, yLabel, maxWidth3);
+    ctx.textAlign = "right";
+    ctx.fillText(TEXT_SCORE_HIGH, x4, yLabel, maxWidth4);
+
+    // values
+    ctx.font = textSize + "px " + TEXT_FONT;
+    ctx.textAlign = "left";
+    ctx.fillText(score, x1, yValue, maxWidth1);
+    ctx.textAlign = "center";
+    ctx.fillText(lives + "/" + GAME_LIVES, x2, yValue, maxWidth2);
+    ctx.fillText(level, x3, yValue, maxWidth3);
+    ctx.textAlign = "right";
+    ctx.fillText(scoreHigh, x4, yValue, maxWidth4);
+
+    // game over
+    if (gameOver) {
+        let text = win ? TEXT_WIN : TEXT_GAME_OVER;
+        ctx.font = textSize + "px " + TEXT_FONT;
+        ctx.textAlign = "center";
+        ctx.fillText(text, width * 0.5, paddle.y - textSize - ball.radius * 2, maxWidth);
+    }
+    
 }
 
 function drawBall() {
@@ -195,6 +266,9 @@ function keyDown(event) {
     switch (event.keyCode) {
         case 32: // spacebar to serve the ball
             serve();
+            if(gameOver) {
+                newGame();
+            }
             break;
         case 37: // left arrow for moving paddle to the left
             movePaddle(Direction.LEFT);
@@ -228,17 +302,42 @@ function movePaddle(direction) {
     }
 }
 
-function newGame() {
+function newBall() {
     paddle = new Paddle();
     ball = new Ball();
+}
+
+function newGame() {
+    gameOver = false;
     level = 0;
+    lives = GAME_LIVES;
+    score = 0;
+    win = false;
+
+    // get  high score from local storage
+    let scoreStr = localStorage.getItem(KEY_SCORE);
+    if (scoreStr == null) {
+        scoreHigh = 0;
+    } else {
+        scoreHigh = parseInt(scoreStr);
+    }
+
+    // start a new level
+    newLevel();
+}
+
+function newLevel() {
     touchX = null;
+    newBall();
     createBricks();
 }
 
 function outOfBounds() {
-    // TO DO
-    newGame();
+    lives--;
+    if (lives == 0) {
+        gameOver = true;
+    }
+    newBall();
 }
 
 function serve() {
@@ -247,8 +346,10 @@ function serve() {
         return false;
     }
 
-    // random angle
-    let angle = Math.random() * Math.PI / 2 + Math.PI / 4;
+    // random angle (not less than min bounce angle)
+    let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
+    let range = Math.PI - minBounceAngle * 2;
+    let angle = Math.random() * range + minBounceAngle;
     applyBallSpeed(angle);
     return true;
 }
@@ -260,6 +361,7 @@ function setDimensions() {
     canvas.width = width;
     canvas.height = height;
     ctx.lineWidth = wall;
+    ctx.textBaseline = "middle";
     newGame();
 }
 
@@ -302,6 +404,9 @@ function touchMove(event) {
 
 function touchStart(event) {
     if (serve()) {
+        if(gameOver) {
+             newGame();
+        }
         return;
     }
     touchX = event.touches[0].clientX;
@@ -339,7 +444,6 @@ function updateBall(delta) {
 
     // handle out of bounds
     if (ball.y > canvas.height) {
-        console.log("TEST");
         outOfBounds();
     }
 
@@ -356,12 +460,34 @@ function updateBricks(delta) {
     OUTER: for (let i = 0; i < bricks.length; i++) {
         for(let j = 0; j < BRICK_COLUMNS; j++) {
             if (bricks[i][j] != null && bricks[i][j].intersect(ball)) {
-                bricks[i][j] = null;
+                updateScore(bricks[i][j].score);
+                ball.setSpeed(bricks[i][j].speedMult);
+
+                // set ball to the edge of the brick
+                if (ball.yv < 0) {
+                    ball.y = bricks[i][j].bot + ball.radius * 0.5;
+                } else {
+                    ball.y = bricks[i][j].bot + ball.radius * 0.5;
+                }
+
                 ball.yv = -ball.yv;
+                bricks[i][j] = null;
+                numBricks--;
                 spinBall();
-                // TODO SCORE
                 break OUTER;
             }
+        }
+    }
+
+    // next level
+    if (numBricks == 0) {
+        if (level < MAX_LEVEL) {
+            level++;
+            newLevel();
+        } else {
+            gameOver = true;
+            win = true;
+            newBall();
         }
     }
 }
@@ -391,6 +517,16 @@ function updatePaddle(delta) {
     
 }
 
+function updateScore(brickScore) {
+    score += brickScore;
+
+    // check for a high score
+    if (score > scoreHigh) {
+        scoreHigh = score;
+        localStorage.setItem(KEY_SCORE, scoreHigh);
+    }
+}
+
 function Ball() {
     this.radius = wall / 2;
     this.x = paddle.x;
@@ -398,9 +534,14 @@ function Ball() {
     this.speed = BALL_SPEED * height; 
     this.xv = 0;
     this.yv = 0;
+
+    this.setSpeed = function(speedMult) {
+        this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
+        console.log("speed =" + this.speed);
+    }
 }
 
-function Brick(left, top, w, h, color) {
+function Brick(left, top, w, h, color, score, speedMult) {
     this.w = w;
     this.h = h;
     this.bot = top + h;
@@ -408,6 +549,8 @@ function Brick(left, top, w, h, color) {
     this.right = left + w;
     this.top = top;
     this.color = color;
+    this.score = score;
+    this.speedMult = speedMult;
 
     this.intersect = function(ball) {
         let bBot = ball.y + ball.radius * 0.5;
