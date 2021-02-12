@@ -3,19 +3,19 @@
 const BALL_SPEED = 0.5; // starting ball speed as a fraction of screen height per second
 const BALL_SPEED_MAX = 1.5; // max ball speed as a multiple of starting speed
 const BALL_SPIN = 0.2; // ball deflection off the paddle (0 = no spin, 1 =  high spin)
-const BRICK_ROWS = 8; // Starting nummer of brick rows
-const BRICK_COLUMNS = 14; // Number of brick columns
-const BRICK_GAP = 0.3; // Brick gap as a fraction of wall width
-const GAME_LIVES = 3; // Starting number of games lives
-const KEY_SCORE = "Highscore"; // Save key for local storage of high score
-const MARGIN = 6; // Number of empty rows above the bricks
+const BRICK_ROWS = 8; // starting nummer of brick rows
+const BRICK_COLUMNS = 14; // number of brick columns
+const BRICK_GAP = 0.3; // brick gap as a fraction of wall width
+const GAME_LIVES = 3; // starting number of games lives
+const KEY_SCORE = "Highscore"; // save key for local storage of high score
+const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
-const PADDLE_WIDTH = 0.1; // Paddle width as a fraction of screen width
-const PADDLE_SPEED = 0.5; // Paddle speed as a fraction of screen width per second
-const POWERUP_CHANCE = 1; // probability of a powerup per brick (between zero and one)
-const POWERUP_SPEED = 0.15 // powerup speed as a fraction of screen height
-const WALL = 0.015; // Wall/ball/paddle size as a fraction of shortest screen dimension
+const PADDLE_WIDTH = 0.1; // paddle width as a fraction of screen width
+const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
+const POWERUP_CHANCE = 1; // probability of a powerup under a brick (between 0 and 1)
+const POWERUP_SPEED = 0.15; // powerup drop speed as a fraction of the screen height
+const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
 
 
 // colors
@@ -41,7 +41,7 @@ const Direction = {
     STOP: 2
 }
 
-const powerUpType = {
+const PowerUpType = {
     EXTENSION: {color: "#0095DD"},
     LIFE: {color: "#0095DD"},
     STICKY: {color: "#0095DD"},
@@ -127,7 +127,7 @@ function createBricks() {
     let rowH = totalSpaceY / totalRows;
     let gap = wall * BRICK_GAP;
     let h = rowH - gap;
-    let textSize = rowH * MARGIN * 0.15;
+    textSize = rowH * MARGIN * 0.15;
 
     // column dimensions
     let totalSpaceX = width - wall * 2;
@@ -170,7 +170,7 @@ function drawPowerUps() {
     for (let powerUp of powerUps) {
         ctx.fillStyle = powerUp.type.color;
         ctx.strokeStyle = powerUp.type.color;
-        ctx.strokeRect(PowerUp.x - PowerUp.width * 0.5, PowerUp.y - PowerUp.height * 0.5, PowerUp.width, PowerUp.height);
+        ctx.strokeRect(powerUp.x - powerUp.w * 0.5, powerUp.y - powerUp.h * 0.5, powerUp.w, powerUp.h);
     }
 }
 
@@ -501,19 +501,20 @@ function updateBricks(delta) {
                 if (ball.yv < 0) {
                     ball.y = bricks[i][j].bot + ball.radius * 0.5;
                 } else {
-                    ball.y = bricks[i][j].bot + ball.radius * 0.5;
+                    ball.y = bricks[i][j].top - ball.radius * 0.5;
                 }
-
+                
                 // create a powerup
                 if (Math.random() <= POWERUP_CHANCE) {
-                    let px = bricks[i][j].left + bricks[i][j].width / 2;
-                    let py = bricks[i][j].top + bricks[i][j].height / 2;
-                    let pSize = bricks[i][j].width / 2;
-                    let pKeys = Object.keys(powerUpType);
+                    let px = bricks[i][j].left + bricks[i][j].w / 2;
+                    let py = bricks[i][j].top + bricks[i][j].h / 2;
+                    let pSize = bricks[i][j].w / 10;
+                    let pKeys = Object.keys(PowerUpType);
                     let pKey = pKeys[Math.floor(Math.random() * pKeys.length)];
-                    powerUps.push(new PowerUp(px, py, pSize, powerUpType[pKey]));
+                    powerUps.push(new PowerUp(px, py, pSize, PowerUpType[pKey]));
                 }
 
+                // bounce the ball and destroy the brick
                 ball.yv = -ball.yv;
                 bricks[i][j] = null;
                 numBricks--;
@@ -618,8 +619,8 @@ function Paddle() {
 }
 
 function PowerUp(x, y, size, type) {
-    this.width = size;
-    this.height = size;
+    this.w = size;
+    this.h = size;
     this.x = x;
     this.y = y;
     this.type = type;
