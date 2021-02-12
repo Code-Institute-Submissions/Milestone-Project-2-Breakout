@@ -1,8 +1,8 @@
 // game parameters
 
-const BALL_SPEED = 0.5; // Starting ball speed as a fraction of screen height per second
-const BALL_SPEED_MAX = 2; // Max ball speed as a multiple of starting speed
-const BALL_SPIN = 0.2; // Ball deflection off the paddle (0 = no spin, 1 =  high spin)
+const BALL_SPEED = 0.5; // starting ball speed as a fraction of screen height per second
+const BALL_SPEED_MAX = 1.5; // max ball speed as a multiple of starting speed
+const BALL_SPIN = 0.2; // ball deflection off the paddle (0 = no spin, 1 =  high spin)
 const BRICK_ROWS = 8; // Starting nummer of brick rows
 const BRICK_COLUMNS = 14; // Number of brick columns
 const BRICK_GAP = 0.3; // Brick gap as a fraction of wall width
@@ -13,15 +13,17 @@ const MAX_LEVEL = 10; // maximum game level (+2 rows for each level)
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
 const PADDLE_WIDTH = 0.1; // Paddle width as a fraction of screen width
 const PADDLE_SPEED = 0.5; // Paddle speed as a fraction of screen width per second
-const WALL = 0.02; // Wall/ball/paddle size as a fraction of shortest screen dimension
+const POWERUP_CHANCE = 1; // probability of a powerup per brick (between zero and one)
+const POWERUP_SPEED = 0.15 // powerup speed as a fraction of screen height
+const WALL = 0.015; // Wall/ball/paddle size as a fraction of shortest screen dimension
 
 
 // colors
 const COLOR_BACKGROUND = "black";
-const COLOR_WALL = "black";
-const COLOR_PADDLE = "#0095DD";
 const COLOR_BALL = "#0095DD";
+const COLOR_PADDLE = "#0095DD";
 const COLOR_TEXT = "#0095DD";
+const COLOR_WALL = "black";
 
 // text
 const TEXT_FONT = "Arial";
@@ -39,14 +41,27 @@ const Direction = {
     STOP: 2
 }
 
+const powerUpType = {
+    EXTENSION: {color: "#0095DD"},
+    LIFE: {color: "#0095DD"},
+    STICKY: {color: "#0095DD"},
+    SUPER: {color: "#0095DD"}
+}
+
 // set up the game canvas and context
 var canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
 var ctx = canvas.getContext("2d");
 
+// set up sound effects
+var fxBrick = new Audio("assets/sounds/brick.wav");
+var fxPaddle = new Audio("assets/sounds/paddle.wav");
+var fxPowerup = new Audio("assets/sounds/powerup.wav");
+var fxWall = new Audio("assets/sounds/wall.wav");
+
 // game variables
-var ball, bricks = [], paddle;
-var gameOver, win;
+var ball, bricks = [], paddle, powerUps = [];
+var gameOver, powerUpExtension, powerUpSticky, powerUpSuper, win;
 var level, lives, score, scoreHigh;
 var numBricks, textSize, touchX;
 
@@ -86,6 +101,7 @@ function loop(timeNow) {
     //draw
     drawBackGround();
     drawWalls();
+    drawPowerUps();
     drawPaddle();
     drawBricks();
     drawText();
@@ -111,7 +127,7 @@ function createBricks() {
     let rowH = totalSpaceY / totalRows;
     let gap = wall * BRICK_GAP;
     let h = rowH - gap;
-    textSize = rowH * MARGIN * 0.15;
+    let textSize = rowH * MARGIN * 0.15;
 
     // column dimensions
     let totalSpaceX = width - wall * 2;
@@ -147,6 +163,15 @@ function drawBackGround() {
 function drawPaddle() {
     ctx.fillStyle = COLOR_PADDLE;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
+}
+
+function drawPowerUps() {
+    ctx.lineWidth = wall * 0.35;
+    for (let powerUp of powerUps) {
+        ctx.fillStyle = powerUp.type.color;
+        ctx.strokeStyle = powerUp.type.color;
+        ctx.strokeRect(PowerUp.x - PowerUp.width * 0.5, PowerUp.y - PowerUp.height * 0.5, PowerUp.width, PowerUp.height);
+    }
 }
 
 function drawText() {
@@ -219,6 +244,7 @@ function drawBricks() {
 
 function drawWalls() {
     let halfWall = wall * 0.5;
+    ctx.lineWidth = wall;
     ctx.strokeStyle = COLOR_WALL;
     ctx.beginPath();
     ctx.moveTo(halfWall, height);
@@ -303,6 +329,9 @@ function movePaddle(direction) {
 }
 
 function newBall() {
+    powerUpExtension = false;
+    powerUpSticky = false;
+    powerUpSuper = false;
     paddle = new Paddle();
     ball = new Ball();
 }
@@ -327,6 +356,7 @@ function newGame() {
 }
 
 function newLevel() {
+    powerUps = [];
     touchX = null;
     newBall();
     createBricks();
@@ -351,6 +381,7 @@ function serve() {
     let range = Math.PI - minBounceAngle * 2;
     let angle = Math.random() * range + minBounceAngle;
     applyBallSpeed(angle);
+    fxPaddle.play();
     return true;
 }
 
@@ -360,7 +391,6 @@ function setDimensions() {
     wall = WALL * (height < width ? height : width);
     canvas.width = width;
     canvas.height = height;
-    ctx.lineWidth = wall;
     ctx.textBaseline = "middle";
     newGame();
 }
@@ -420,14 +450,17 @@ function updateBall(delta) {
     if (ball.x < wall + ball.radius * 0.5) {
         ball.x = wall + ball.radius * 0.5;
         ball.xv = -ball.xv;
+        fxWall.play();
         spinBall();
     } else if (ball.x > canvas.width - wall - ball.radius * 0.5) {
         ball.x = canvas.width - wall - ball.radius * 0.5;
         ball.xv = -ball.xv;
+        fxWall.play();
         spinBall();
     } else if (ball.y <  wall + ball.radius * 0.5) {
         ball.y <  wall + ball.radius * 0.5;
         ball.yv = -ball.yv;
+        fxWall.play();
         spinBall();
     }
 
@@ -439,6 +472,7 @@ function updateBall(delta) {
     ) {
         ball.y = paddle.y - paddle.height * 0.5 - ball.radius * 0.5;
         ball.yv = -ball.yv;
+        fxPaddle.play();
         spinBall();
     }
 
@@ -470,9 +504,20 @@ function updateBricks(delta) {
                     ball.y = bricks[i][j].bot + ball.radius * 0.5;
                 }
 
+                // create a powerup
+                if (Math.random() <= POWERUP_CHANCE) {
+                    let px = bricks[i][j].left + bricks[i][j].width / 2;
+                    let py = bricks[i][j].top + bricks[i][j].height / 2;
+                    let pSize = bricks[i][j].width / 2;
+                    let pKeys = Object.keys(powerUpType);
+                    let pKey = pKeys[Math.floor(Math.random() * pKeys.length)];
+                    powerUps.push(new PowerUp(px, py, pSize, powerUpType[pKey]));
+                }
+
                 ball.yv = -ball.yv;
                 bricks[i][j] = null;
                 numBricks--;
+                fxBrick.play();
                 spinBall();
                 break OUTER;
             }
@@ -537,7 +582,6 @@ function Ball() {
 
     this.setSpeed = function(speedMult) {
         this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
-        console.log("speed =" + this.speed);
     }
 }
 
@@ -571,4 +615,13 @@ function Paddle() {
     this.y = canvas.height - this.height * 2;
     this.speed = PADDLE_SPEED * width; 
     this.xv = 0;
+}
+
+function PowerUp(x, y, size, type) {
+    this.width = size;
+    this.height = size;
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.yv = POWERUP_SPEED * height;
 }
