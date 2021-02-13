@@ -64,7 +64,7 @@ var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
 var ball, bricks = [], paddle, powerUps = [];
-var gameOver, powerUpExtension, powerUpSticky, powerUpSuper, win;
+var gameOver, paused, powerUpExtension, powerUpSticky, powerUpSuper, win;
 var level, lives, score, scoreHigh;
 var numBricks, textSize, touchX;
 
@@ -96,12 +96,14 @@ function loop(timeNow) {
 
     //update
     if(!gameOver) {
+        if(!paused) {
         updatePaddle(timeDelta);
         updateBall(timeDelta);
         updateBricks(timeDelta);
         updatePowerUps(timeDelta);
+        }
     }
-
+    
     //draw
     drawBackGround();
     drawWalls();
@@ -110,7 +112,7 @@ function loop(timeNow) {
     drawBricks();
     drawText();
     drawBall();
-
+    
     //call the next loop
     requestAnimationFrame(loop);
 }
@@ -306,6 +308,9 @@ function keyDown(event) {
         case 39: // right arrow for moving paddle to the right
             movePaddle(Direction.RIGHT);
             break;
+        case 80: // p button to pause the game
+            togglePause();
+            break;
     }
 }
 
@@ -444,6 +449,16 @@ function touchStart(event) {
         return;
     }
     touchX = event.touches[0].clientX;
+}
+
+function togglePause() {
+    if (!paused) {
+        paused = true;
+        console.log(paused);
+    } else if (paused) {
+        paused = false;
+        console.log(paused);
+    }
 }
 
 function updateBall(delta) {
