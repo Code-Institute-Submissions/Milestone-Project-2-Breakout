@@ -12,12 +12,12 @@ const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
+const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
 const POWERUP_BONUS = 50; // bonus points for collecting a powerup when a powerup is in play
 const POWERUP_CHANCE = 0.05; // probability of a powerup under a brick (between 0 and 1)
 const POWERUP_SPEED = 0.05; // powerup drop speed as a fraction of the screen height
 const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
-
 
 // colors
 const COLOR_BACKGROUND = "black";
@@ -64,7 +64,7 @@ var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
 var ball, bricks = [], paddle, powerUps = [];
-var gameOver, paused, powerUpExtension, powerUpSticky, powerUpSuper, win;
+var gameOver, muted, paused, powerUpExtension, powerUpSticky, powerUpSuper, win;
 var level, lives, score, scoreHigh;
 var numBricks, textSize, touchX;
 
@@ -82,7 +82,7 @@ document.addEventListener("keyup", keyUp);
 window.addEventListener("resize", setDimensions);
 
 // set up game loop
-var timeDelta, timeLast;
+var timeDelta, timeLast, timeMessageFrame;
 requestAnimationFrame(loop);
 
 function loop(timeNow) {
@@ -93,7 +93,7 @@ function loop(timeNow) {
     // calculate time difference
     timeDelta = (timeNow - timeLast) / 1000; // divided by thousand to set it in s instead of ms
     timeLast = timeNow;
-
+    
     //update
     if(!gameOver) {
         if(!paused) {
@@ -176,7 +176,7 @@ function drawPowerUps() {
     for (let powerUp of powerUps) {
         ctx.fillStyle = powerUp.type.color;
         ctx.strokeStyle = powerUp.type.color;
-        ctx.strokeRect(powerUp.x - powerUp.w * 0.5, powerUp.y - powerUp.h * 0.5, powerUp.w, powerUp.h);
+        ctx.fillRect(powerUp.x - powerUp.w * 0.5, powerUp.y - powerUp.h * 0.5, powerUp.w, powerUp.h);
     }
 }
 
@@ -213,7 +213,7 @@ function drawText() {
     ctx.textAlign = "left";
     ctx.fillText(score, x1, yValue, maxWidth1);
     ctx.textAlign = "center";
-    ctx.fillText(lives + "/" + GAME_LIVES, x2, yValue, maxWidth2);
+    ctx.fillText(lives, x2, yValue, maxWidth2);
     ctx.fillText(level, x3, yValue, maxWidth3);
     ctx.textAlign = "right";
     ctx.fillText(scoreHigh, x4, yValue, maxWidth4);
@@ -223,9 +223,51 @@ function drawText() {
         let text = win ? TEXT_WIN : TEXT_GAME_OVER;
         ctx.font = textSize + "px " + TEXT_FONT;
         ctx.textAlign = "center";
-        ctx.fillText(text, width * 0.5, paddle.y - textSize - ball.radius * 2, maxWidth);
+        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
     }
-    
+
+    // mute
+
+    function drawSoundOffText() {
+        text = "SOUND OFF";
+        ctx.font = textSize + "px " + TEXT_FONT;
+        ctx.textAlign = "center";
+        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
+    }
+
+    function drawSoundOnText() {
+        text = "SOUND ON";
+        ctx.font = textSize + "px " + TEXT_FONT;
+        ctx.textAlign = "center";
+        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
+    }
+
+    function deleteSoundText() {
+        text = "SOUND OFF";
+        ctx.font = textSize + "px " + TEXT_FONT;
+        ctx.textAlign = "center";
+        ctx.clearRect(width * 0.5, height * 0.15, 20, 20);
+    }
+        
+    if (muted) {
+       
+        drawSoundOffText();
+        setTimeout(function() {console.log("5 seconds passed after sound turned off.");}, 5000); 
+           
+    } else if (!muted) {
+        
+        drawSoundOnText();
+        setTimeout(function() {console.log("5 seconds passed after sound turned on.");}, 5000); 
+        
+    }
+
+    // pause
+    if (paused) {
+        let text = "PAUSED";
+        ctx.font = textSize + "px " + TEXT_FONT;
+        ctx.textAlign = "center";
+        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
+    }    
 }
 
 function drawBall() {
@@ -273,13 +315,13 @@ function getBrickColor(rank, highestRank) {
         b = 157;
     }
 
-    if (fraction > 0.25 && fraction < 0.50) {
+    if (fraction >= 0.25 && fraction <= 0.50) {
         r = 0;
         g = 149;
         b = 221;
     }
 
-     if (fraction > 0.50 && fraction < 0.75) {
+     if (fraction >= 0.50 && fraction <= 0.75) {
         r = 7;
         g = 174;
         b = 225;
@@ -307,6 +349,9 @@ function keyDown(event) {
             break;
         case 39: // right arrow for moving paddle to the right
             movePaddle(Direction.RIGHT);
+            break;
+        case 77: // m button to mute the sounds
+            toggleMute();
             break;
         case 80: // p button to pause the game
             togglePause();
@@ -390,7 +435,9 @@ function serve() {
     let range = Math.PI - minBounceAngle * 2;
     let angle = Math.random() * range + minBounceAngle;
     applyBallSpeed(powerUpSticky ? Math.PI / 2 : angle);
-    fxPaddle.play();
+    if(!muted) {
+        fxPaddle.play();
+    }
     return true;
 }
 
@@ -454,10 +501,16 @@ function touchStart(event) {
 function togglePause() {
     if (!paused) {
         paused = true;
-        console.log(paused);
     } else if (paused) {
         paused = false;
-        console.log(paused);
+    }
+}
+
+function toggleMute() {
+    if (!muted) {
+        muted = true;
+    } else if (muted) {
+        muted = false;
     }
 }
 
@@ -469,17 +522,23 @@ function updateBall(delta) {
     if (ball.x < wall + ball.radius * 0.5) {
         ball.x = wall + ball.radius * 0.5;
         ball.xv = -ball.xv;
-        fxWall.play();
+        if(!muted) {
+            fxWall.play();
+        }
         spinBall();
     } else if (ball.x > canvas.width - wall - ball.radius * 0.5) {
         ball.x = canvas.width - wall - ball.radius * 0.5;
         ball.xv = -ball.xv;
-        fxWall.play();
+        if(!muted) {
+            fxWall.play();
+        }
         spinBall();
     } else if (ball.y <  wall + ball.radius * 0.5) {
         ball.y <  wall + ball.radius * 0.5;
         ball.yv = -ball.yv;
-        fxWall.play();
+        if(!muted) {
+            fxWall.play();
+        }
         spinBall();
     }
 
@@ -497,7 +556,9 @@ function updateBall(delta) {
             ball.yv = -ball.yv;
             spinBall();
         }
-        fxPaddle.play();
+        if(!muted) {
+            fxPaddle.play();
+        }
     }
 
     // handle out of bounds
@@ -539,7 +600,9 @@ function updateBricks(delta) {
                 }
                 bricks[i][j] = null;
                 numBricks--;
-                fxBrick.play();
+                if(!muted) {
+                    fxBrick.play();
+                }
                 spinBall();
                 break OUTER;
             }
@@ -627,7 +690,9 @@ function updatePaddle(delta) {
                     break;  
             }
             powerUps.splice(i, 1);
-            fxPowerup.play();
+            if(!muted) {
+                fxPowerup.play();
+            }
         }
     }
 }
@@ -691,9 +756,9 @@ function Brick(left, top, w, h, color, score, speedMult) {
 
 function Paddle() {
     this.width = PADDLE_WIDTH * width;
-    this.height = wall * 1.25;
+    this.height = wall * PADDLE_SIZE;
     this.x = canvas.width / 2;
-    this.y = canvas.height - this.height * 2;
+    this.y = canvas.height - this.height * 3;
     this.speed = PADDLE_SPEED * width; 
     this.xv = 0;
 }
