@@ -11,10 +11,11 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
-const PADDLE_WIDTH = 0.1; // paddle width as a fraction of screen width
+const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
-const POWERUP_CHANCE = 1; // probability of a powerup under a brick (between 0 and 1)
-const POWERUP_SPEED = 0.15; // powerup drop speed as a fraction of the screen height
+const POWERUP_BONUS = 50; // bonus points for collecting a powerup when a powerup is in play
+const POWERUP_CHANCE = 0.05; // probability of a powerup under a brick (between 0 and 1)
+const POWERUP_SPEED = 0.05; // powerup drop speed as a fraction of the screen height
 const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
 
 
@@ -22,6 +23,8 @@ const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen di
 const COLOR_BACKGROUND = "black";
 const COLOR_BALL = "#0095DD";
 const COLOR_PADDLE = "#0095DD";
+const COLOR_STICKYPADDLE = "red";
+const COLOR_SUPERBALL = "red";
 const COLOR_TEXT = "#0095DD";
 const COLOR_WALL = "black";
 
@@ -96,6 +99,7 @@ function loop(timeNow) {
         updatePaddle(timeDelta);
         updateBall(timeDelta);
         updateBricks(timeDelta);
+        updatePowerUps(timeDelta);
     }
 
     //draw
@@ -161,7 +165,7 @@ function drawBackGround() {
 }
 
 function drawPaddle() {
-    ctx.fillStyle = COLOR_PADDLE;
+    ctx.fillStyle = powerUpSticky ? COLOR_STICKYPADDLE : COLOR_PADDLE;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
 }
 
@@ -225,7 +229,7 @@ function drawText() {
 function drawBall() {
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = COLOR_BALL;
+    ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
     ctx.fill();
     ctx.closePath();
 }
@@ -380,7 +384,7 @@ function serve() {
     let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
     let range = Math.PI - minBounceAngle * 2;
     let angle = Math.random() * range + minBounceAngle;
-    applyBallSpeed(angle);
+    applyBallSpeed(powerUpSticky ? Math.PI / 2 : angle);
     fxPaddle.play();
     return true;
 }
@@ -471,19 +475,19 @@ function updateBall(delta) {
         && ball.x < paddle.x + paddle.width * 0.5 + ball.radius * 0.5
     ) {
         ball.y = paddle.y - paddle.height * 0.5 - ball.radius * 0.5;
-        ball.yv = -ball.yv;
+        if (powerUpSticky){
+            ball.xv = 0;
+            ball.yv = 0;
+        } else {
+            ball.yv = -ball.yv;
+            spinBall();
+        }
         fxPaddle.play();
-        spinBall();
     }
 
     // handle out of bounds
     if (ball.y > canvas.height) {
         outOfBounds();
-    }
-
-    // move the stationary ball with paddle
-    if (ball.yv == 0) {
-        ball.x = paddle.x;
     }
 }
 
@@ -514,8 +518,10 @@ function updateBricks(delta) {
                     powerUps.push(new PowerUp(px, py, pSize, PowerUpType[pKey]));
                 }
 
-                // bounce the ball and destroy the brick
+                // bounce the ball (if not a superball) and destroy the brick
+                if (!powerUpSuper) {
                 ball.yv = -ball.yv;
+                }
                 bricks[i][j] = null;
                 numBricks--;
                 fxBrick.play();
@@ -552,6 +558,7 @@ function updatePaddle(delta) {
     }
     
     // move the paddle
+    let lastPaddleX = paddle.x;
     paddle.x += paddle.xv * delta;
 
     // stop paddle at walls
@@ -560,7 +567,65 @@ function updatePaddle(delta) {
     } else if (paddle.x > canvas.width - wall - paddle.width * 0.5) {
         paddle.x = canvas.width - wall - paddle.width * 0.5;
     }
+
+
+    // move the stationary ball with paddle
+    if (ball.yv == 0) {
+        ball.x += paddle.x - lastPaddleX;
+    }
     
+    // collect powerup
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        if (
+            powerUps[i].x + powerUps[i].w * 0.5 > paddle.x - paddle.width * 0.5
+            && powerUps[i].x - powerUps[i].w * 0.5 < paddle.x + paddle.width * 0.5
+            && powerUps[i].y + powerUps[i].h * 0.5 > paddle.y + paddle.height * 0.5
+            && powerUps[i].y - powerUps[i].h * 0.5 < paddle.y + paddle.height * 0.5
+        ) {
+            switch(powerUps[i].type) {
+                case PowerUpType.EXTENSION:
+                    // double the width of the paddle
+                    if (powerUpExtension) {
+                        score += POWERUP_BONUS;
+                    } else {
+                        powerUpExtension = true;
+                        paddle.width *= 2;
+                    }
+                    break;                   
+                case PowerUpType.LIFE:
+                    // add a life
+                    lives++;
+                    break;
+                case PowerUpType.STICKY:
+                     if (powerUpSticky) {
+                        score += POWERUP_BONUS;
+                    } else {
+                        powerUpSticky = true;
+                    }
+                    break;  
+                case PowerUpType.SUPER:
+                     if (powerUpSuper) {
+                        score += POWERUP_BONUS;
+                    } else {
+                        powerUpSuper = true;
+                    }
+                    break;  
+            }
+            powerUps.splice(i, 1);
+            fxPowerup.play();
+        }
+    }
+}
+
+function updatePowerUps(delta) {
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        powerUps[i].y += powerUps[i].yv * delta;
+
+        // delete off-screen powerups
+        if (powerUps[i].y - powerUps[i].h * 0.5 > height) {
+            powerUps.splice(i, 1);
+        }
+    }
 }
 
 function updateScore(brickScore) {
