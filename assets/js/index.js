@@ -11,11 +11,12 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
+const NUM_OF_BALLS = 3; // amounts of balls in play when multiball is active
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
 const POWERUP_BONUS = 50; // bonus points for collecting a powerup when a powerup is in play
-const POWERUP_CHANCE = 0.05; // probability of a powerup under a brick (between 0 and 1)
+const POWERUP_CHANCE = 1; // probability of a powerup under a brick (between 0 and 1)
 const POWERUP_SPEED = 0.05; // powerup drop speed as a fraction of the screen height
 const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
 
@@ -35,6 +36,7 @@ const TEXT_LEVEL = "LEVEL";
 const TEXT_LIVES = "LIVES";
 const TEXT_SCORE = "SCORE";
 const TEXT_SCORE_HIGH = "HIGH SCORE";
+const TEXT_SOUND = "SOUND";
 const TEXT_WIN = "YOU WIN!";
 
 // definitions
@@ -47,6 +49,7 @@ const Direction = {
 const PowerUpType = {
     EXTENSION: {color: "#0095DD"},
     LIFE: {color: "#0095DD"},
+    MULTI: {color: "#0095DD"},
     STICKY: {color: "#0095DD"},
     SUPER: {color: "#0095DD"}
 }
@@ -63,9 +66,9 @@ var fxPowerup = new Audio("assets/sounds/powerup.wav");
 var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
-var ball, bricks = [], paddle, powerUps = [];
-var gameOver, muted, paused, powerUpExtension, powerUpSticky, powerUpSuper, win;
-var level, lives, score, scoreHigh;
+var ball, balls = [], bricks = [], paddle, powerUps = [];
+var gameOver, muted, paused, powerUpExtension, powerUpMulti, powerUpSticky, powerUpSuper, win;
+var level, lives, score, scoreHigh, sound;
 var numBricks, textSize, touchX;
 
 // derived dimensions
@@ -166,6 +169,10 @@ function drawBackGround() {
     ctx.fillRect(0 , 0, canvas.width, canvas.height);
 }
 
+function clearDisplay() {
+    ctx.clearRect(0, height * 0.13, width, textSize * 1.2);
+}
+
 function drawPaddle() {
     ctx.fillStyle = powerUpSticky ? COLOR_STICKYPADDLE : COLOR_PADDLE;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
@@ -187,14 +194,16 @@ function drawText() {
     let labelSize = textSize * 0.9;
     let margin = wall * 2;
     let maxWidth = width - margin *2;
-    let maxWidth1 = maxWidth * 0.27;
+    let maxWidth1 = maxWidth * 0.2;
     let maxWidth2 = maxWidth * 0.2;
     let maxWidth3 = maxWidth * 0.2;
-    let maxWidth4 = maxWidth * 0.27;
+    let maxWidth4 = maxWidth * 0.2;
+    let maxWidth5 = maxWidth * 0.2;
     let x1 = margin;
-    let x2 = width * 0.4;
-    let x3 = width * 0.6;
-    let x4 = width - margin;
+    let x2 = width * 0.25;
+    let x3 = width * 0.5;
+    let x4 = width * 0.75;
+    let x5 = width - margin;
     let yLabel = wall + labelSize;
     let yValue = yLabel + textSize * 1.2;
 
@@ -205,8 +214,9 @@ function drawText() {
     ctx.textAlign = "center";
     ctx.fillText(TEXT_LIVES, x2, yLabel, maxWidth2);
     ctx.fillText(TEXT_LEVEL, x3, yLabel, maxWidth3);
-    ctx.textAlign = "right";
     ctx.fillText(TEXT_SCORE_HIGH, x4, yLabel, maxWidth4);
+    ctx.textAlign = "right";
+    ctx.fillText(TEXT_SOUND, x5, yLabel, maxWidth5);
 
     // values
     ctx.font = textSize + "px " + TEXT_FONT;
@@ -215,8 +225,9 @@ function drawText() {
     ctx.textAlign = "center";
     ctx.fillText(lives, x2, yValue, maxWidth2);
     ctx.fillText(level, x3, yValue, maxWidth3);
-    ctx.textAlign = "right";
     ctx.fillText(scoreHigh, x4, yValue, maxWidth4);
+    ctx.textAlign = "right";
+    ctx.fillText(sound, x5, yValue, maxWidth5);
 
     // game over
     if (gameOver) {
@@ -251,23 +262,23 @@ function drawText() {
         
     if (muted) {
        
-        drawSoundOffText();
-        setTimeout(function() {console.log("5 seconds passed after sound turned off.");}, 5000); 
+        sound = "OFF"
            
     } else if (!muted) {
         
-        drawSoundOnText();
-        setTimeout(function() {console.log("5 seconds passed after sound turned on.");}, 5000); 
+        sound = "ON"
         
     }
 
     // pause
-    if (paused) {
-        let text = "PAUSED";
-        ctx.font = textSize + "px " + TEXT_FONT;
-        ctx.textAlign = "center";
-        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
-    }    
+    if(!gameOver) {
+        if (paused) {
+            let text = "PAUSED";
+            ctx.font = textSize + "px " + TEXT_FONT;
+            ctx.textAlign = "center";
+            ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
+         }    
+    }
 }
 
 function drawBall() {
@@ -687,7 +698,14 @@ function updatePaddle(delta) {
                     } else {
                         powerUpSuper = true;
                     }
-                    break;  
+                    break;
+                case PowerUpType.MULTI:
+                     if (powerUpMulti) {
+                        score += POWERUP_BONUS;
+                    } else {
+                        powerUpMulti = true;
+                    }
+                    break;    
             }
             powerUps.splice(i, 1);
             if(!muted) {
