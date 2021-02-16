@@ -11,7 +11,7 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
-const NUM_OF_BALLS = 3; // amounts of balls in play when multiball is active
+const NUM_OF_BALLS = 2; // amounts of balls in play when multiball is active
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
@@ -66,7 +66,7 @@ var fxPowerup = new Audio("assets/sounds/powerup.wav");
 var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
-var ball, balls = [], bricks = [], paddle, powerUps = [];
+var ball, balls = [], bricks = [], multiball, paddle, powerUps = [];
 var gameOver, muted, paused, powerUpExtension, powerUpMulti, powerUpSticky, powerUpSuper, win;
 var level, lives, score, scoreHigh, sound;
 var numBricks, textSize, touchX;
@@ -109,13 +109,24 @@ function loop(timeNow) {
     
     //draw
     drawBackGround();
+    // console.log("drawBackGround()");
     drawWalls();
+    // console.log("drawWalls()");
     drawPowerUps();
+    // console.log("drawPowerUps()");
     drawPaddle();
+    // console.log("drawPaddle()");
     drawBricks();
+    // console.log("drawBricks()");
     drawText();
+    // console.log("drawText())");
     drawBall();
-    
+    // console.log("drawBall()");
+
+    console.log(powerUpMulti);
+    console.log(balls);
+
+        
     //call the next loop
     requestAnimationFrame(loop);
 }
@@ -237,37 +248,11 @@ function drawText() {
         ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
     }
 
-    // mute
-
-    function drawSoundOffText() {
-        text = "SOUND OFF";
-        ctx.font = textSize + "px " + TEXT_FONT;
-        ctx.textAlign = "center";
-        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
-    }
-
-    function drawSoundOnText() {
-        text = "SOUND ON";
-        ctx.font = textSize + "px " + TEXT_FONT;
-        ctx.textAlign = "center";
-        ctx.fillText(text, width * 0.5, height * 0.15, maxWidth);
-    }
-
-    function deleteSoundText() {
-        text = "SOUND OFF";
-        ctx.font = textSize + "px " + TEXT_FONT;
-        ctx.textAlign = "center";
-        ctx.clearRect(width * 0.5, height * 0.15, 20, 20);
-    }
-        
+    // mute        
     if (muted) {
-       
-        sound = "OFF"
-           
+        sound = "OFF";  
     } else if (!muted) {
-        
-        sound = "ON"
-        
+        sound = "ON";
     }
 
     // pause
@@ -284,6 +269,14 @@ function drawText() {
 function drawBall() {
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawMultiBall() {
+    ctx.beginPath();
+    ctx.arc(multiball.x, multiball.y, multiball.radius, 0, 2 * Math.PI);
     ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
     ctx.fill();
     ctx.closePath();
@@ -397,8 +390,10 @@ function newBall() {
     powerUpExtension = false;
     powerUpSticky = false;
     powerUpSuper = false;
+    powerUpMulti = false;
     paddle = new Paddle();
     ball = new Ball();
+    balls.push(ball);
 }
 
 function newGame() {
@@ -525,9 +520,11 @@ function toggleMute() {
     }
 }
 
+console.log("test out of update");
+
 function updateBall(delta) {
-    ball.x += ball.xv * delta;
-    ball.y += ball.yv * delta;
+        ball.x += ball.xv * delta;
+        ball.y += ball.yv * delta;
 
     // bounce the ball off walls
     if (ball.x < wall + ball.radius * 0.5) {
@@ -571,11 +568,14 @@ function updateBall(delta) {
             fxPaddle.play();
         }
     }
+    
+    
 
     // handle out of bounds
     if (ball.y > canvas.height) {
         outOfBounds();
     }
+    
 }
 
 
@@ -699,13 +699,31 @@ function updatePaddle(delta) {
                         powerUpSuper = true;
                     }
                     break;
+                    
                 case PowerUpType.MULTI:
                      if (powerUpMulti) {
                         score += POWERUP_BONUS;
                     } else {
                         powerUpMulti = true;
+                        if (powerUpMulti) {
+                        for (let i = 0; i < NUM_OF_BALLS; i++) {
+                            //for(let j = 0; j < balls.length; j++) {
+                            console.log("TEST" + i);
+                            
+                            
+                            balls[i].radius = wall / 2;
+                            balls[i].x = Math.random() * width;
+                            balls[i].y = paddle.y - paddle.height;
+                            balls[i].speed = BALL_SPEED * height; 
+                            balls[i].xv = 0;
+                            balls[i].yv = 0;
+                            balls.push(new Ball(radius, x, y, speed, xv, yv));
+                            console.log(balls);
+                            
+                            }
+                        }
                     }
-                    break;    
+                    break;
             }
             powerUps.splice(i, 1);
             if(!muted) {
@@ -743,10 +761,11 @@ function Ball() {
     this.speed = BALL_SPEED * height; 
     this.xv = 0;
     this.yv = 0;
-
+   
     this.setSpeed = function(speedMult) {
         this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
     }
+
 }
 
 function Brick(left, top, w, h, color, score, speedMult) {
