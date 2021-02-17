@@ -110,19 +110,12 @@ function loop(timeNow) {
     
     //draw
     drawBackGround();
-    // console.log("drawBackGround()");
     drawWalls();
-    // console.log("drawWalls()");
     drawPowerUps();
-    // console.log("drawPowerUps()");
     drawPaddle();
-    // console.log("drawPaddle()");
     drawBricks();
-    // console.log("drawBricks()");
     drawText();
-    // console.log("drawText())");
     drawBall();
-    // console.log("drawBall()");
 
     console.log(powerUpMulti);
     console.log(balls);
@@ -269,11 +262,15 @@ function drawText() {
 }
 
 function drawBall() {
+        console.log(powerUpMulti + "in drawBall function.");
+        for (let i = 0; i < NUM_OF_BALLS; i++) {
+        var ball = balls[i];
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
         ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
         ctx.fill();
         ctx.closePath();
+        }
 }
 
 function drawBricks() {
