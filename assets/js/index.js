@@ -11,7 +11,7 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
-const NUM_OF_BALLS = 2; // amounts of balls in play when multiball is active
+const NUM_OF_BALLS = 3; // amounts of balls in play when multiball is active
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
@@ -67,7 +67,8 @@ var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
 var ball, balls = [], bricks = [], multiball, paddle, powerUps = [];
-var gameOver, muted, paused, powerUpExtension, powerUpMulti, powerUpSticky, powerUpSuper, win;
+var gameOver, muted, paused, win;
+var powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
 var level, lives, score, scoreHigh, sound;
 var numBricks, textSize, touchX;
 
@@ -125,6 +126,7 @@ function loop(timeNow) {
 
     console.log(powerUpMulti);
     console.log(balls);
+
 
         
     //call the next loop
@@ -267,19 +269,11 @@ function drawText() {
 }
 
 function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function drawMultiBall() {
-    ctx.beginPath();
-    ctx.arc(multiball.x, multiball.y, multiball.radius, 0, 2 * Math.PI);
-    ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
-    ctx.fill();
-    ctx.closePath();
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+        ctx.fill();
+        ctx.closePath();
 }
 
 function drawBricks() {
@@ -387,13 +381,22 @@ function movePaddle(direction) {
 }
 
 function newBall() {
-    powerUpExtension = false;
-    powerUpSticky = false;
-    powerUpSuper = false;
-    powerUpMulti = false;
+    // powerUpExtension = false;
+    // powerUpSticky = false;
+    // powerUpSuper = false;
+    // powerUpMulti = false;
+    // paddle = new Paddle();
+    balls = [];
+    for(let i = 0; i < NUM_OF_BALLS; i++) {
+        ball = new Ball();
+        ball.x = Math.random() * width;
+        balls.push(ball);
+    }
+    balls[2].x = paddle.x;
+}
+
+function newPaddle() {
     paddle = new Paddle();
-    ball = new Ball();
-    balls.push(ball);
 }
 
 function newGame() {
@@ -402,6 +405,7 @@ function newGame() {
     lives = GAME_LIVES;
     score = 0;
     win = false;
+    balls = [];
 
     // get  high score from local storage
     let scoreStr = localStorage.getItem(KEY_SCORE);
@@ -418,6 +422,7 @@ function newGame() {
 function newLevel() {
     powerUps = [];
     touchX = null;
+    newPaddle();
     newBall();
     createBricks();
 }
@@ -427,6 +432,7 @@ function outOfBounds() {
     if (lives == 0) {
         gameOver = true;
     }
+    newPaddle();
     newBall();
 }
 
@@ -569,8 +575,6 @@ function updateBall(delta) {
         }
     }
     
-    
-
     // handle out of bounds
     if (ball.y > canvas.height) {
         outOfBounds();
@@ -628,6 +632,7 @@ function updateBricks(delta) {
         } else {
             gameOver = true;
             win = true;
+            newPaddle();
             newBall();
         }
     }
@@ -698,30 +703,12 @@ function updatePaddle(delta) {
                     } else {
                         powerUpSuper = true;
                     }
-                    break;
-                    
+                    break;          
                 case PowerUpType.MULTI:
                      if (powerUpMulti) {
                         score += POWERUP_BONUS;
                     } else {
                         powerUpMulti = true;
-                        if (powerUpMulti) {
-                        for (let i = 0; i < NUM_OF_BALLS; i++) {
-                            //for(let j = 0; j < balls.length; j++) {
-                            console.log("TEST" + i);
-                            
-                            
-                            balls[i].radius = wall / 2;
-                            balls[i].x = Math.random() * width;
-                            balls[i].y = paddle.y - paddle.height;
-                            balls[i].speed = BALL_SPEED * height; 
-                            balls[i].xv = 0;
-                            balls[i].yv = 0;
-                            balls.push(new Ball(radius, x, y, speed, xv, yv));
-                            console.log(balls);
-                            
-                            }
-                        }
                     }
                     break;
             }
@@ -754,6 +741,26 @@ function updateScore(brickScore) {
     }
 }
 
+/*
+function multiBall() {
+    for(var i = 0; i < NUM_OF_BALLS; i++) {
+        this.radius = wall / 2;
+        this.x = Math.random() * width;
+        this.y = paddle. y - paddle.height;
+        this.speed = BALL_SPEED * height;
+        this.xv = 0;
+        this.yv = 0;
+   
+
+        this.setSpeed = function(speedMult) {
+        this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
+        }
+
+    balls.push(this);
+    }
+}
+*/
+
 function Ball() {
     this.radius = wall / 2;
     this.x = paddle.x;
@@ -763,9 +770,8 @@ function Ball() {
     this.yv = 0;
    
     this.setSpeed = function(speedMult) {
-        this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
+    this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
     }
-
 }
 
 function Brick(left, top, w, h, color, score, speedMult) {
