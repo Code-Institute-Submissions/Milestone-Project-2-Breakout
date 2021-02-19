@@ -102,7 +102,7 @@ function loop(timeNow) {
         if(!paused) {
         updatePaddle(timeDelta);
         updateBall(timeDelta);
-        // updateBricks(timeDelta);
+        updateBricks(timeDelta);
         updatePowerUps(timeDelta);
         }
     }
@@ -112,7 +112,7 @@ function loop(timeNow) {
     drawWalls();
     drawPowerUps();
     drawPaddle();
-    // drawBricks();
+    drawBricks();
     drawText();
     drawBall();
            
@@ -600,15 +600,12 @@ function updateBall(delta) {
     if(powerUpMulti) {
         if (balls[0].y > canvas.height) {
             ballZeroOut = true;
-            console.log("Ball 0 of canvas: " + ballZeroOut);
         }
         if (balls[1].y > canvas.height) {
             ballOneOut = true;
-            console.log("Ball 1 of canvas: " + ballOneOut);
         }
         if (balls[2].y > canvas.height) {
             ballTwoOut = true;
-            console.log("Ball 2 of canvas: " + ballTwoOut);
         }
         if (ballZeroOut 
         && ballOneOut 
@@ -620,10 +617,10 @@ function updateBall(delta) {
 
 
 function updateBricks(delta) {
-
-    // check for ball collisions
+    
     OUTER: for (let i = 0; i < bricks.length; i++) {
         for(let j = 0; j < BRICK_COLUMNS; j++) {
+            for(ball of balls) {
             if (bricks[i][j] != null && bricks[i][j].intersect(ball)) {
                 updateScore(bricks[i][j].score);
                 ball.setSpeed(bricks[i][j].speedMult);
@@ -654,13 +651,13 @@ function updateBricks(delta) {
                 if(!muted) {
                     fxBrick.play();
                 }
-                spinBall();
+                // spinBall();
                 break OUTER;
                 }
             
         }
     }
-
+}
     // next level
     if (numBricks == 0) {
         if (level < MAX_LEVEL) {
@@ -807,8 +804,6 @@ function Brick(left, top, w, h, color, score, speedMult) {
     this.score = score;
     this.speedMult = speedMult;
 
-    for(i = 0; i < numOfBalls; i++) {
-        ball = balls[i];
     this.intersect = function(ball) {
         let bBot = ball.y + ball.radius * 0.5;
         let bLeft = ball.x - ball.radius * 0.5;
@@ -819,7 +814,6 @@ function Brick(left, top, w, h, color, score, speedMult) {
                 && this.bot > bTop
                 && bBot > this.top;
     }
-}
 }
 
 function Paddle() {
