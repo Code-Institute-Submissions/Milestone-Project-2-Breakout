@@ -65,7 +65,7 @@ var fxPowerup = new Audio("assets/sounds/powerup.wav");
 var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
-var ball, balls = [], bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
+var ball, balls = [], ballZeroOut = false, ballOneOut = false, ballTwoOut = false, bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
 var gameOver, muted, paused, win;
 var powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
 var level, lives, score, scoreHigh, sound;
@@ -102,7 +102,7 @@ function loop(timeNow) {
         if(!paused) {
         updatePaddle(timeDelta);
         updateBall(timeDelta);
-        updateBricks(timeDelta);
+        // updateBricks(timeDelta);
         updatePowerUps(timeDelta);
         }
     }
@@ -112,11 +112,9 @@ function loop(timeNow) {
     drawWalls();
     drawPowerUps();
     drawPaddle();
-    drawBricks();
+    // drawBricks();
     drawText();
     drawBall();
-
-    console.log(powerUpMulti);
            
     //call the next loop
     requestAnimationFrame(loop);
@@ -397,7 +395,7 @@ function newBall() {
     powerUpExtension = false;
     powerUpSticky = false;
     powerUpSuper = false;
-    powerUpMulti = false;
+    powerUpMulti = true;
     // paddle = new Paddle();
     balls = [];
     for(let i = 0; i < numOfBalls; i++) {
@@ -544,9 +542,10 @@ function updateBall(delta) {
    
     for(let i = 0; i < numOfBalls; i++) {
         ball = balls[i];
+        
         ball.x += ball.xv * delta;
         ball.y += ball.yv * delta;
-    
+        
     // bounce the ball off walls
     if (ball.x < wall + ball.radius * 0.5) {
         ball.x = wall + ball.radius * 0.5;
@@ -563,7 +562,7 @@ function updateBall(delta) {
         }
         // spinBall();
     } else if (ball.y <  wall + ball.radius * 0.5) {
-        ball.y <  wall + ball.radius * 0.5;
+        ball.y = wall + ball.radius * 0.5;
         ball.yv = -ball.yv;
         if(!muted) {
             fxWall.play();
@@ -591,10 +590,32 @@ function updateBall(delta) {
     }
     
     // handle out of bounds
-    if (ball.y > canvas.height) {
-        outOfBounds();
+    if(!powerUpMulti) {
+        if (ball.y > canvas.height) {
+            outOfBounds();
+        }
     }
-    }  
+    } 
+    
+    if(powerUpMulti) {
+        if (balls[0].y > canvas.height) {
+            ballZeroOut = true;
+            console.log("Ball 0 of canvas: " + ballZeroOut);
+        }
+        if (balls[1].y > canvas.height) {
+            ballOneOut = true;
+            console.log("Ball 1 of canvas: " + ballOneOut);
+        }
+        if (balls[2].y > canvas.height) {
+            ballTwoOut = true;
+            console.log("Ball 2 of canvas: " + ballTwoOut);
+        }
+        if (ballZeroOut 
+        && ballOneOut 
+        && ballTwoOut) {
+            powerUpMulti = false;
+        }
+    }
 }
 
 
@@ -635,7 +656,8 @@ function updateBricks(delta) {
                 }
                 spinBall();
                 break OUTER;
-            }
+                }
+            
         }
     }
 
@@ -724,7 +746,11 @@ function updatePaddle(delta) {
                         score += POWERUP_BONUS;
                     } else {
                         powerUpMulti = true;
-                        numOfBalls = 3;
+                        let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
+                        let range = Math.PI - minBounceAngle * 2;
+                        let angle = Math.random() * range + minBounceAngle;
+                        applyBallSpeed(powerUpSticky ? Math.PI / 2 : angle);
+                        // applyBallSpeed(angle);
                     }
                     break;
             }
@@ -781,6 +807,8 @@ function Brick(left, top, w, h, color, score, speedMult) {
     this.score = score;
     this.speedMult = speedMult;
 
+    for(i = 0; i < numOfBalls; i++) {
+        ball = balls[i];
     this.intersect = function(ball) {
         let bBot = ball.y + ball.radius * 0.5;
         let bLeft = ball.x - ball.radius * 0.5;
@@ -791,6 +819,7 @@ function Brick(left, top, w, h, color, score, speedMult) {
                 && this.bot > bTop
                 && bBot > this.top;
     }
+}
 }
 
 function Paddle() {
