@@ -11,7 +11,6 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
-const NUM_OF_BALLS = 3; // amounts of balls in play when multiball is active
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
@@ -66,7 +65,7 @@ var fxPowerup = new Audio("assets/sounds/powerup.wav");
 var fxWall = new Audio("assets/sounds/wall.wav");
 
 // game variables
-var ball, balls = [], bricks = [], multiball, paddle, powerUps = [];
+var ball, balls = [], bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
 var gameOver, muted, paused, win;
 var powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
 var level, lives, score, scoreHigh, sound;
@@ -118,18 +117,27 @@ function loop(timeNow) {
     drawBall();
 
     console.log(powerUpMulti);
-    console.log(balls);
-
-
-        
+           
     //call the next loop
     requestAnimationFrame(loop);
 }
 
-// update x and y velocities of the ball
+// update x and y velocities of the balls
 function applyBallSpeed(angle) {
-    ball.xv = ball.speed * Math.cos(angle);
-    ball.yv = -ball.speed * Math.sin(angle);
+    if(!powerUpMulti){
+        var ball = balls[2];
+        ball.xv = ball.speed * Math.cos(angle);
+        ball.yv = -ball.speed * Math.sin(angle);
+    } else {
+        for (i = numOfBalls -1; i >= 0; i--) {
+            let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
+            let range = Math.PI - minBounceAngle * 2;
+            let angle = Math.random() * range + minBounceAngle; 
+            var ball = balls[i];
+            ball.xv = ball.speed * Math.cos(angle);
+            ball.yv = -ball.speed * Math.sin(angle);
+        }
+    }
 }
 
 function createBricks() {
@@ -262,15 +270,23 @@ function drawText() {
 }
 
 function drawBall() {
-        console.log(powerUpMulti + "in drawBall function.");
-        for (let i = 0; i < NUM_OF_BALLS; i++) {
-        var ball = balls[i];
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-        ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
-        ctx.fill();
-        ctx.closePath();
-        }
+        if(!powerUpMulti) {
+            var ball = balls[2];
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+            ctx.fill();
+            ctx.closePath();
+        } else {
+            for (i = numOfBalls -1; i >= 0; i--) {
+                var ball = balls[i];
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }   
 }
 
 function drawBricks() {
@@ -378,13 +394,13 @@ function movePaddle(direction) {
 }
 
 function newBall() {
-    // powerUpExtension = false;
-    // powerUpSticky = false;
-    // powerUpSuper = false;
-    // powerUpMulti = false;
+    powerUpExtension = false;
+    powerUpSticky = false;
+    powerUpSuper = false;
+    powerUpMulti = false;
     // paddle = new Paddle();
     balls = [];
-    for(let i = 0; i < NUM_OF_BALLS; i++) {
+    for(let i = 0; i < numOfBalls; i++) {
         ball = new Ball();
         ball.x = Math.random() * width;
         balls.push(ball);
@@ -402,8 +418,9 @@ function newGame() {
     lives = GAME_LIVES;
     score = 0;
     win = false;
+    paddle = new Paddle();
     balls = [];
-
+    
     // get  high score from local storage
     let scoreStr = localStorage.getItem(KEY_SCORE);
     if (scoreStr == null) {
@@ -464,7 +481,7 @@ function spinBall() {
     let upwards = ball.yv < 0;
     let angle = Math.atan2(-ball.yv, ball.xv);
     angle += (Math.random() * Math.PI / 2 - Math.PI / 4) * BALL_SPIN;
-
+    
     // minimum bounce angle
     let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
     if(upwards) {       
@@ -523,12 +540,13 @@ function toggleMute() {
     }
 }
 
-console.log("test out of update");
-
 function updateBall(delta) {
+   
+    for(let i = 0; i < numOfBalls; i++) {
+        ball = balls[i];
         ball.x += ball.xv * delta;
         ball.y += ball.yv * delta;
-
+    
     // bounce the ball off walls
     if (ball.x < wall + ball.radius * 0.5) {
         ball.x = wall + ball.radius * 0.5;
@@ -536,21 +554,21 @@ function updateBall(delta) {
         if(!muted) {
             fxWall.play();
         }
-        spinBall();
+        // spinBall();
     } else if (ball.x > canvas.width - wall - ball.radius * 0.5) {
         ball.x = canvas.width - wall - ball.radius * 0.5;
         ball.xv = -ball.xv;
         if(!muted) {
             fxWall.play();
         }
-        spinBall();
+        // spinBall();
     } else if (ball.y <  wall + ball.radius * 0.5) {
         ball.y <  wall + ball.radius * 0.5;
         ball.yv = -ball.yv;
         if(!muted) {
             fxWall.play();
         }
-        spinBall();
+        // spinBall();
     }
 
     // bounce the ball off the paddle 
@@ -565,7 +583,7 @@ function updateBall(delta) {
             ball.yv = 0;
         } else {
             ball.yv = -ball.yv;
-            spinBall();
+            // spinBall();
         }
         if(!muted) {
             fxPaddle.play();
@@ -576,7 +594,7 @@ function updateBall(delta) {
     if (ball.y > canvas.height) {
         outOfBounds();
     }
-    
+    }  
 }
 
 
@@ -706,6 +724,7 @@ function updatePaddle(delta) {
                         score += POWERUP_BONUS;
                     } else {
                         powerUpMulti = true;
+                        numOfBalls = 3;
                     }
                     break;
             }
@@ -737,26 +756,6 @@ function updateScore(brickScore) {
         localStorage.setItem(KEY_SCORE, scoreHigh);
     }
 }
-
-/*
-function multiBall() {
-    for(var i = 0; i < NUM_OF_BALLS; i++) {
-        this.radius = wall / 2;
-        this.x = Math.random() * width;
-        this.y = paddle. y - paddle.height;
-        this.speed = BALL_SPEED * height;
-        this.xv = 0;
-        this.yv = 0;
-   
-
-        this.setSpeed = function(speedMult) {
-        this.speed = Math.max(this.speed, BALL_SPEED * height * speedMult);
-        }
-
-    balls.push(this);
-    }
-}
-*/
 
 function Ball() {
     this.radius = wall / 2;
