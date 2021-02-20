@@ -15,18 +15,20 @@ const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
 const POWERUP_BONUS = 50; // bonus points for collecting a powerup when a powerup is in play
-const POWERUP_CHANCE = 1; // probability of a powerup under a brick (between 0 and 1)
+const POWERUP_CHANCE = 0.035; // probability of a powerup under a brick (between 0 and 1)
 const POWERUP_SPEED = 0.05; // powerup drop speed as a fraction of the screen height
 const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
 
 // colors
 const COLOR_BACKGROUND = "black";
 const COLOR_BALL = "#0095DD";
+const COLOR_POWERUP = "#0095DD";
 const COLOR_PADDLE = "#0095DD";
 const COLOR_STICKYPADDLE = "red";
 const COLOR_SUPERBALL = "red";
 const COLOR_TEXT = "#0095DD";
 const COLOR_WALL = "black";
+const COLOR_GAME = "#0095DD";
 
 // text
 const TEXT_FONT = "Arial";
@@ -46,33 +48,33 @@ const Direction = {
 }
 
 const PowerUpType = {
-    EXTENSION: {color: "#0095DD"},
-    LIFE: {color: "#0095DD"},
-    MULTI: {color: "#0095DD"},
-    STICKY: {color: "#0095DD"},
-    SUPER: {color: "#0095DD"}
+    EXTENSION: {color: COLOR_POWERUP},
+    LIFE: {color: COLOR_POWERUP},
+    MULTI: {color: COLOR_POWERUP},
+    STICKY: {color: COLOR_POWERUP},
+    SUPER: {color: COLOR_POWERUP}
 }
 
 // set up the game canvas and context
-var canvas = document.createElement("canvas");
+let canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
-var ctx = canvas.getContext("2d");
+let ctx = canvas.getContext("2d");
 
 // set up sound effects
-var fxBrick = new Audio("assets/sounds/brick.wav");
-var fxPaddle = new Audio("assets/sounds/paddle.wav");
-var fxPowerup = new Audio("assets/sounds/powerup.wav");
-var fxWall = new Audio("assets/sounds/wall.wav");
+let fxBrick = new Audio("assets/sounds/brick.wav");
+let fxPaddle = new Audio("assets/sounds/paddle.wav");
+let fxPowerup = new Audio("assets/sounds/powerup.wav");
+let fxWall = new Audio("assets/sounds/wall.wav");
 
-// game variables
-var ball, balls = [], ballZeroOut = false, ballOneOut = false, ballTwoOut = false, bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
-var gameOver, muted, paused, win;
-var powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
-var level, lives, score, scoreHigh, sound;
-var numBricks, textSize, touchX;
+// game letiables
+let ball, balls = [], ballZeroOut = false, ballOneOut = false, ballTwoOut = false, bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
+let gameOver, muted, paused, win;
+let powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
+let level, lives, score, scoreHigh, sound;
+let numBricks, textSize, touchX;
 
 // derived dimensions
-var height, width, wall;
+let height, width, wall;
 setDimensions();
 
 // event listeners
@@ -85,7 +87,7 @@ document.addEventListener("keyup", keyUp);
 window.addEventListener("resize", setDimensions);
 
 // set up game loop
-var timeDelta, timeLast, timeMessageFrame;
+let timeDelta, timeLast, timeMessageFrame;
 requestAnimationFrame(loop);
 
 function loop(timeNow) {
@@ -123,17 +125,19 @@ function loop(timeNow) {
 // update x and y velocities of the balls
 function applyBallSpeed(angle) {
     if(!powerUpMulti){
-        var ball = balls[2];
+        let ball = balls[2];
         ball.xv = ball.speed * Math.cos(angle);
         ball.yv = -ball.speed * Math.sin(angle);
     } else {
         for (i = numOfBalls -1; i >= 0; i--) {
+            if(ball.y > canvas.height + ball.radius * 2) {
             let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
             let range = Math.PI - minBounceAngle * 2;
             let angle = Math.random() * range + minBounceAngle; 
-            var ball = balls[i];
+            let ball = balls[i];
             ball.xv = ball.speed * Math.cos(angle);
             ball.yv = -ball.speed * Math.sin(angle);
+            }
         }
     }
 }
@@ -269,7 +273,7 @@ function drawText() {
 
 function drawBall() {
         if(!powerUpMulti) {
-            var ball = balls[2];
+            let ball = balls[2];
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
             ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
@@ -277,7 +281,7 @@ function drawBall() {
             ctx.closePath();
         } else {
             for (i = numOfBalls -1; i >= 0; i--) {
-                var ball = balls[i];
+                let ball = balls[i];
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
                 ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
@@ -395,7 +399,7 @@ function newBall() {
     powerUpExtension = false;
     powerUpSticky = false;
     powerUpSuper = false;
-    powerUpMulti = true;
+    powerUpMulti = false;
     // paddle = new Paddle();
     balls = [];
     for(let i = 0; i < numOfBalls; i++) {
@@ -598,13 +602,13 @@ function updateBall(delta) {
     } 
     
     if(powerUpMulti) {
-        if (balls[0].y > canvas.height) {
+        if (balls[0].y > canvas.height + ball.radius * 2) {
             ballZeroOut = true;
         }
-        if (balls[1].y > canvas.height) {
+        if (balls[1].y > canvas.height + ball.radius * 2) {
             ballOneOut = true;
         }
-        if (balls[2].y > canvas.height) {
+        if (balls[2].y > canvas.height + ball.radius * 2) {
             ballTwoOut = true;
         }
         if (ballZeroOut 
