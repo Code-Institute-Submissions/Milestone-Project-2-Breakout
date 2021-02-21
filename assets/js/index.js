@@ -11,24 +11,21 @@ const KEY_SCORE = "Highscore"; // save key for local storage of high score
 const MARGIN = 6; // number of empty rows above the bricks
 const MAX_LEVEL = 10; // maximum game level (+2 rows for each level) 
 const MIN_BOUNCE_ANGLE = 30; // minimum bounce angle from the horizontal in degrees
+const NUM_OF_BALLS = 3; 
 const PADDLE_WIDTH = 0.08; // paddle width as a fraction of screen width
 const PADDLE_SIZE = 1.5; // paddle size as a multiple of wall thickness
 const PADDLE_SPEED = 0.5; // paddle speed as a fraction of screen width per 
 const POWERUP_BONUS = 50; // bonus points for collecting a powerup when a powerup is in play
-const POWERUP_CHANCE = 0.035; // probability of a powerup under a brick (between 0 and 1)
+const POWERUP_CHANCE = 1; // probability of a powerup under a brick (between 0 and 1)
 const POWERUP_SPEED = 0.05; // powerup drop speed as a fraction of the screen height
 const WALL = 0.015; // wall/ball/paddle size as a fraction of shortest screen dimension
 
 // colors
 const COLOR_BACKGROUND = "black";
-const COLOR_BALL = "#0095DD";
-const COLOR_POWERUP = "#0095DD";
-const COLOR_PADDLE = "#0095DD";
-const COLOR_STICKYPADDLE = "red";
-const COLOR_SUPERBALL = "red";
-const COLOR_TEXT = "#0095DD";
-const COLOR_WALL = "black";
 const COLOR_GAME = "#0095DD";
+const COLOR_POWERUP = "red";
+const COLOR_WALL = "black";
+
 
 // text
 const TEXT_FONT = "Arial";
@@ -48,11 +45,11 @@ const Direction = {
 }
 
 const PowerUpType = {
-    EXTENSION: {color: COLOR_POWERUP},
-    LIFE: {color: COLOR_POWERUP},
-    MULTI: {color: COLOR_POWERUP},
-    STICKY: {color: COLOR_POWERUP},
-    SUPER: {color: COLOR_POWERUP}
+    EXTENSION: {color: COLOR_GAME},
+    LIFE: {color: COLOR_GAME},
+    MULTI: {color: COLOR_GAME},
+    STICKY: {color: COLOR_GAME},
+    SUPER: {color: COLOR_GAME}
 }
 
 // set up the game canvas and context
@@ -67,7 +64,7 @@ let fxPowerup = new Audio("assets/sounds/powerup.wav");
 let fxWall = new Audio("assets/sounds/wall.wav");
 
 // game letiables
-let ball, balls = [], ballZeroOut = false, ballOneOut = false, ballTwoOut = false, bricks = [], multiball, numOfBalls = 3, paddle, powerUps = [];
+let ball, balls = [], ballZeroOut = false, ballOneOut = false, ballTwoOut = false, bricks = [], multiball, paddle, powerUps = [];
 let gameOver, muted, paused, win;
 let powerUpExtension = false, powerUpMulti = false, powerUpSticky = false, powerUpSuper = false;
 let level, lives, score, scoreHigh, sound;
@@ -129,15 +126,13 @@ function applyBallSpeed(angle) {
         ball.xv = ball.speed * Math.cos(angle);
         ball.yv = -ball.speed * Math.sin(angle);
     } else {
-        for (i = numOfBalls -1; i >= 0; i--) {
-            if(ball.y > canvas.height + ball.radius * 2) {
+        for (i = NUM_OF_BALLS-1; i >= 0; i--) {
             let minBounceAngle = MIN_BOUNCE_ANGLE / 180 * Math.PI;
             let range = Math.PI - minBounceAngle * 2;
             let angle = Math.random() * range + minBounceAngle; 
             let ball = balls[i];
             ball.xv = ball.speed * Math.cos(angle);
             ball.yv = -ball.speed * Math.sin(angle);
-            }
         }
     }
 }
@@ -190,7 +185,7 @@ function clearDisplay() {
 }
 
 function drawPaddle() {
-    ctx.fillStyle = powerUpSticky ? COLOR_STICKYPADDLE : COLOR_PADDLE;
+    ctx.fillStyle = powerUpSticky ? COLOR_POWERUP : COLOR_GAME;
     ctx.fillRect(paddle.x - paddle.width * 0.5, paddle.y - paddle.height * 0.5, paddle.width, paddle.height);
 }
 
@@ -204,7 +199,7 @@ function drawPowerUps() {
 }
 
 function drawText() {
-    ctx.fillStyle = COLOR_TEXT;
+    ctx.fillStyle = COLOR_GAME;
 
     // dimensions
     let labelSize = textSize * 0.9;
@@ -276,15 +271,15 @@ function drawBall() {
             let ball = balls[2];
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-            ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+            ctx.fillStyle = powerUpSuper ? COLOR_POWERUP : COLOR_GAME;
             ctx.fill();
             ctx.closePath();
         } else {
-            for (i = numOfBalls -1; i >= 0; i--) {
+            for (i = NUM_OF_BALLS-1; i >= 0; i--) {
                 let ball = balls[i];
                 ctx.beginPath();
                 ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-                ctx.fillStyle = powerUpSuper ? COLOR_SUPERBALL : COLOR_BALL;
+                ctx.fillStyle = powerUpSuper ? COLOR_POWERUP : COLOR_GAME;
                 ctx.fill();
                 ctx.closePath();
             }
@@ -402,7 +397,7 @@ function newBall() {
     powerUpMulti = false;
     // paddle = new Paddle();
     balls = [];
-    for(let i = 0; i < numOfBalls; i++) {
+    for(let i = 0; i < NUM_OF_BALLS; i++) {
         ball = new Ball();
         ball.x = Math.random() * width;
         balls.push(ball);
@@ -544,7 +539,7 @@ function toggleMute() {
 
 function updateBall(delta) {
    
-    for(let i = 0; i < numOfBalls; i++) {
+    for(let i = 0; i < NUM_OF_BALLS; i++) {
         ball = balls[i];
         
         ball.x += ball.xv * delta;
@@ -702,8 +697,11 @@ function updatePaddle(delta) {
 
 
     // move the stationary ball with paddle
-    if (ball.yv == 0) {
-        ball.x += paddle.x - lastPaddleX;
+    for(let i = 0; i < NUM_OF_BALLS; i++) {
+        ball = balls[i];
+            if (ball.yv == 0) {
+            ball.x += paddle.x - lastPaddleX;
+        }
     }
     
     // collect powerup
