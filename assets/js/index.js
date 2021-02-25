@@ -861,3 +861,19 @@ function toggleInstructions() {
         instructions.style.display = "none";
     }
 }
+
+function checkDoNotShow() {
+    let checkbox = document.getElementById("checkbox");
+    localStorage.setItem("checkbox", checkbox.checked);
+}
+
+let checked = JSON.parse(localStorage.getItem("checkbox"));
+
+if (checked == true) {
+    document.getElementById("instructionscontainer").style.display = "none";
+} else {
+    document.getElementById("instructionscontainer").style.display = "block";
+}
+
+
+
