@@ -6,6 +6,30 @@
     z-index: 0;
 }
 
+.information {
+    position: absolute;
+    bottom: 15px;
+    right: 30px;
+    color: #FFFFFF;
+    z-index: 1;
+}
+
+.information a:link {
+  color: #FFFFFF;
+}
+
+.information a:visited {
+  color: #FFFFFF;
+}
+
+.information a:hover {
+  color: #0095DD;
+}
+
+.information a:active {
+  color: #FFFFFF;
+}
+
 .overlay {
   position: fixed; 
   width: 100%; 
@@ -15,11 +39,11 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0,0,0,0.7); 
-  z-index: 1; 
+  z-index: 2; 
 }
 
 .instructions {
-    width: 33%;
+    width: 560px;
     height: 200px;
     position: absolute;
     top: 50%;
@@ -136,9 +160,11 @@ p {
   height: 15px;
   opacity: 1;
 }
+
 .close:hover {
   opacity: 1;
 }
+
 .close:before, .close:after {
   position: absolute;
   left: 5px;
@@ -147,9 +173,19 @@ p {
   width: 2px;
   background-color: #0095DD;
 }
+
+.close:hover::after {
+    background-color: #FFFFFF;
+}
+
+.close:hover::before {
+    background-color: #FFFFFF;
+}
+
 .close:before {
   transform: rotate(45deg);
 }
+
 .close:after {
   transform: rotate(-45deg);
 }
