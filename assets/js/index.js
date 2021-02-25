@@ -1,5 +1,3 @@
-// GAME FUNCTIONALITY
-
 // game parameters
 const BALL_SPEED = 0.5; // starting ball speed as a fraction of screen height per second
 const BALL_SPEED_MAX = 1.5; // max ball speed as a multiple of starting speed
@@ -853,13 +851,13 @@ function PowerUp(x, y, size, type) {
     this.yv = POWERUP_SPEED * height;
 }
 
-// LANDING PAGE AND INSTRUCTIONS / CONTROLS MENU
+// INSTRUCTIONS SCREEN
 
-/*
-function myFunction() {
-  var x = document.getElementById("myDIV");
-  if (x.style.display === "none") {
-    x.style.display = "block";
-  } 
+function toggleInstructions() {
+    let instructions = document.getElementById("instructionscontainer");
+    if (instructions.style.display === "none") {
+        instructions.style.display = "block";
+    } else {
+        instructions.style.display = "none";
+    }
 }
-*/
