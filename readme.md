@@ -46,16 +46,13 @@ Below the wireframes:
 
 ## Surface
 
-Overall, we want this project to have a tight look but at the same time it needs to breath so choice of fonts, icons and colorschemes, but also the positioning will be important to reach this result.<br><br>In our strategy we have determined to use an eye catcher to spark the user's interest. For consistency and thus a good look and feel the choice of color scheme will be based on the eyecatcher we are going to implement.
+We want this version of Outbreak to have a more modern look than the original version.
 
 * Colour scheme
-    * The two main colours are #5DADE2 and #FAFAFA
+    * The main colour is #0095DD.
 
 * Typography
-    * The main font for text paragraphs is Lato and is used throughout the website with Sans Serif as the fallback font in case for any reason the font isn't being imported into the site correctly. The font used for all the headings is Montserratn again with Sans Serif as fallback. Both are clean, modern fonts and thus appropriate for this project.
-
-* Imagery
-    * Gradients were used to overlay my personal pictures.
+    * The main font for text paragraphs is Arial and this is the only font used throughout the project.
 
 # Technologies Used
 
@@ -63,17 +60,12 @@ Overall, we want this project to have a tight look but at the same time it needs
 
 * [HTML5](https://en.wikipedia.org/wiki/HTML) 
 * [CSS3](https://en.wikipedia.org/wiki/CSS)
+* [Javascript](https://en.wikipedia.org/wiki/JavaScript)
 
 ## Frameworks, Libraries & Programs Used
 
-* [Bootstrap 4.5.2](https://getbootstrap.com/docs/4.5/getting-started/introduction/) 
-    * Bootstrap was mainly used to assits in responsiveness and to build the grids of the website.
-
-* [Google Fonts](https://fonts.google.com/) 
-    * Google fonts was used to import the two fonts: Lato and Monserrat.
-
 * [Font Awesome](https://fontawesome.com/start) 
-    * Font Awesome was used to import some icons used throughout the website.
+    * Font Awesome was used to import some icons.
 
 * [Git](https://git-scm.com/) 
     * Git was used for version control by utilizing the Gitpod terminal to commit to Git and Push to Github.
@@ -81,18 +73,28 @@ Overall, we want this project to have a tight look but at the same time it needs
 * [Github](https://github.com/) 
     * GitHub is used to store the projects code after being pushed from Git.
 
-* [GIMP 2.10](https://www.gimp.org/) 
-    * GIMP 2.10 was used to scale and to adjust the logos and images.
-
 * [Balsamiq](https://balsamiq.com/) 
     * Balsamiq was used to create the wireframes during the design process.
 
+# The realisation of this project
+
+* [Tutorial 1:](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript)
+    I started off the project based on this tutorial, when finalizing this tutorial I wanted to use the gained knowledge to add some powerups, I soon found myself down a rabbithole and I was losing way too much time trying to figure out how to add this powerup functionality to the game. I did manage to hide a few powerups underneath some bricks, and they do fall towards the bottom of the screen. I decided to browse the web to find another tutorial that contained these powerup functionality to see how it is done right and which logic was used. I left the outcome of this excercise in this project in the assets\js folder: index_ver1.js.
+
+* [Tutorial 2:](https://www.youtube.com/c/MtFordStudios/videos)
+    As discussed in the previous bulletpoint, a second tutorial was used to gain more insight on how to properly implement powerups into the game. I quickly found myself facing another dilemma: trying to implement the poweruplogic from this tutorial in my already existing javascript code or starting from scratch. I decided to play it safe and start completely based on this tutorial.
+    In the end I am sure this was the right thing to do because this tutorial was approaching some things in a complete different way and features that were being built at the end of the project were based on the solid foundation and logic layed out in the beginning.
+
+* My very own feature:
+    When I finalized the project based on tutorial 2, I had a severe case of imposter syndrome. I just had to add a feature of my own to the project. I used to play this game at a very young age on my uncles 486. There was a powerup in the version I used to play that was not a part of this version yet: the multiball. I decided to give it a go and by reverse engineering what was happening in the existing code and some sleepless nights later I was able to implement the multiball feature. Although I have deactivated the spinBall() function to get it to work and some bugs might occur when combined with other powerups, I am happy with the outcome for now. It just comes down to fixing these bugs and refactoring the spinBall() function.
+
 # Testing
 
-The W3C Markup Validator and W3C CSS Validator Services were used to validate every page of the project to ensure there were no syntax errors in the project.
+The W3C Markup Validator, W3C CSS Validator and jshint.com services were used to validate every page of the project to ensure there were no syntax errors in the project.
 
-* [W3C Markup Validator](https://validator.w3.org/) - [Results](https://validator.w3.org/nu/?doc=https%3A%2F%2Fnicopauwels.github.io%2FMilestone-Project-1%2F)
-* [W3C CSS Validator](https://jigsaw.w3.org/css-validator/) - [Results](https://jigsaw.w3.org/css-validator/validator?uri=https%3A%2F%2Fnicopauwels.github.io%2FMilestone-Project-1%2F&profile=css3svg&usermedium=all&warning=1&vextwarning=&lang=en#css) 
+* [W3C Markup Validator](https://validator.w3.org/) - [Results](https://validator.w3.org/nu/?doc=https%3A%2F%2Fnicopauwels.github.io%2FMilestone-Project-2-Breakout%2F)
+* [W3C CSS Validator](https://jigsaw.w3.org/css-validator/) - [Results](https://jigsaw.w3.org/css-validator/validator?uri=https%3A%2F%2Fnicopauwels.github.io%2FMilestone-Project-2-Breakout%2F&profile=css3svg&usermedium=all&warning=1&vextwarning=&lang=en) 
+* [jshint.com](https://jshint.com/) - There were some warnings but practically all of them were browser warnings.
 
 ## Testing user stories discussed earlier
 
