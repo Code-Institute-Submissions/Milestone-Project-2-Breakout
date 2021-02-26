@@ -25,9 +25,9 @@ We want to create a reconstruction of the original Breakout game. Breakout begin
 ## Scope / Features
 
 Based on what we have determined in our strategy and taken into account in our user stories, the project should contain a game field with:<br>
-* a ball which starts moving as soon as the user has decided to serve it;
-* a paddle which can be moved to the left and right and bounces the ball back towards the;
-* 8 rows of bricks that dissapear when they get hit by a ball;
+* A ball which starts moving as soon as the user has decided to serve it;
+* A paddle which can be moved to the left and right and bounces the ball back towards the;
+* Eight rows consisting out of fourteen bricks that dissapear when they get hit by a ball;
 * There is a chance a destroyed brick contains a powerup, when this is the case, the powerup should start falling to the bottom of the screen;
 * When the powerup mentioned above is caught by the paddle, the powerup is activated;
 * We want to display the current level, the remaining lives, the score, the high score and info on the sound.
@@ -98,33 +98,39 @@ The W3C Markup Validator, W3C CSS Validator and jshint.com services were used to
 
 ## Testing user stories discussed earlier
 
-* I want to find out more about Nico;
-    * Through the navigationbar its fairly easy to find out more about Nico through the About Me link.
-* I want to know more about Nico's education and current skillset;
-    * Through the navigationbar its fairly easy to find out more about Nico through the About Me link.
-* I want to know where Nico has worked in the past;
-    * Through the navigationbar its fairly easy to find out more about Nico through the About Me link.
-* I want to take a look at Nico's portfolio as a developer;
-    * Through the navigationbar its fairly easy to find out more about Nico through the About Me link.
-* It would be nice to find out more about Nico's leisure time activities;
-    * Through the navigationbar its fairly easy to find out more about Nico's leisure time activities through the Impossible list link.
-* I have to contact this guy.
-    * Through the navigation bar and its Contact button which leads to a contactform and the various icons found in the heading its really easy to get in touch with Nico.
-
-! Everything mentioned above is also possible in the footer for when the user has scrolled or navigated through the entire site.
+* I want to play Breakout;
+    * User is able to play Breakout.
+* I want to be able to serve the ball;
+    * User is able to serve the ball by hitting the spacebar or touching the screen on mobile devices.
+* I want to be able to destroy the bricks;
+    * When a ball hits a brick it dissapears.
+* I want to be able to keep the ball in the game with the paddle;
+    * When the ball hits the paddle it bounces back as expected.
+* I want to be able to see the powerups falling down to the bottom of the screen;
+    * When a powerup is to be found under a destroyed brick, it starts falling towards the bottom of the screen.
+* I want to be able to catch the powerups and experience them in the gameplay;
+    * When a powerup is caught by the paddle, it is activated.
+* I want to know which level I am playing, how many lives I've got left, my current score, my all time high score and whether the sound is on or off.
+    * The level is being displayed and increases when all bricks have been destroyed, also a new level is being spawned.
+    * The lives decrease when a ball is out of bounds, the game ends when all lives are lost and game over is being displayed.
+    * The current score is being increased depending on the brick that was destroyed its rank.
+    * The all time high score is kept track off by using window.localStorage and thus saves the high score across browser sessions.
+    * Also whether the sound is on or off is being displayed.
 
 ## Further Testing
 
 * The website was tested on Google Chrome, Mozilla Firefox and Safari browsers.
-* The website was viewed on a variety of devices such as Desktop, Laptop, iPhone 8 & iPhone X.
-* The website was viewed on [Responsinator](http://www.responsinator.com/) to check overall responsiveness.
-* A large amount of testing was done to ensure that all pages were linking correctly.
-* Friends and family members were asked to review the site to point out any bugs and/or user experience issues.
+* The website was viewed on a variety of devices such as desktops, laptops, iPhone 8 and some android devices.
+* The website was viewed in google chrome dev tools to check overall responsiveness.
+* Friends and family members were asked to review the game to point out any bugs and/or user experience issues.
 
 ## Known bugs
 
-* On iPhone 8 Safari the hamburger icon shows little black dashes.
-* On mobile devices the animation in the header only is visible after refreshing the page.
+* On larger screens of desktops when the browser window is maximized, the ball not always bounces off the paddle but just flies through.
+* When multiball has been active and sticky powerup is activated bugs might occur:
+    * the balls don't serve correctly or dont serve at all when sticky powerup is active
+    * the balls that went out of play suddenly appear back on the canvas
+
 
 # Deployment
 
@@ -132,33 +138,24 @@ The W3C Markup Validator, W3C CSS Validator and jshint.com services were used to
 
 The project was deployed to GitHub Pages using the following steps:
 
-1. Log in to GitHub and locate the [GitHub Repository](https://github.com/NicoPauwels/Milestone-Project-1/).
+1. Log in to GitHub and locate the [GitHub Repository](https://github.com/NicoPauwels/Milestone-Project-2-Breakout).
 2. At the top of the Repository, locate the "Settings" button on the menu.
 3. Scroll down the Settings page until you locate the "GitHub Pages" Section.
 4. Under "Source", click the dropdown called "None" and select "Master Branch".
 5. The page will automatically refresh.
-6. Scroll back down through the page to locate the new published site [link](https://nicopauwels.github.io/Milestone-Project-1/) in the "Github Pages" section.
+6. Scroll back down through the page to locate the new published site [link](https://nicopauwels.github.io/Milestone-Project-2-Breakout/) in the "Github Pages" section.
 
 # Credits
 
 ## Code
 
+### Tutorials
+* [Tutorial 1](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript)
+* [Tutorial 2](https://www.youtube.com/c/MtFordStudios/videos)
 * Various ongoing problems were solved looking for solutions found on [Stackoverflow](https://www.stackoverflow.com) and [W3Schools](https://www.w3schools.com).
-* [Bootstrap 4](https://getbootstrap.com/docs/4.5/getting-started/introduction/): The bootstrap library was used mainly to make the site responsive by use of the Bootstrap grid system.
-* [CSS Gradient](https://cssgradient.io/): This handy tool was used to create the gradient overlay effect used on some images.
-
-## Content
-
-* All content was written by the developer except for the content in the Portfiolio section. This content is entirely fictional and I do not own any of it. It was merely used to give content to this project.
-
-## Media
-
-* All images and other media were created by the developer.
-* The logos used were found via google images and were adjusted in GIMP to fit in the project.
-* The animation in the heading was found via a google search. The complete code can be found [here](https://codepen.io/jasperlachance/pen/QNMwBg). Credits to Jasper La Chance for this great animation. 
 
 ## Acknowledgments
 
 * Antonio Rodriguez, my mentor for the continuous support and helpful feedback.
 * John Traas, Code Institute alumni, for the continuous support and helpful feedback.
-* Sander Van De Wiele and Roxanne Ysebaert for testing the project on their mobile devices.
+* Sander Van De Wiele for testing the project on his mobile device.
