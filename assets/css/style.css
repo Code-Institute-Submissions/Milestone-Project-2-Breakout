@@ -546,6 +546,7 @@ h2 {
     .desktopinstructions {
         display: none;
     }
+}
 
 
     /* iphone X Landscape */
@@ -574,7 +575,7 @@ h2 {
     }
 
 }
-}
+
 
     /* iphone X Landscape */
 
@@ -602,7 +603,7 @@ h2 {
     }
 
 }
-}
+
 
     /* iphone 6 - 8 Landscape */
 
@@ -629,5 +630,4 @@ h2 {
         display: none;
     }
 
-}
 }
