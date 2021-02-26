@@ -6,55 +6,6 @@
     z-index: 0;
 }
 
-.information {
-    position: absolute;
-    bottom: 15px;
-    right: 30px;
-    color: #FFFFFF;
-    z-index: 1;
-}
-
-.information a:link {
-  color: #FFFFFF;
-}
-
-.information a:visited {
-  color: #FFFFFF;
-}
-
-.information a:hover {
-  color: #0095DD;
-}
-
-.information a:active {
-  color: #FFFFFF;
-}
-
-.overlay {
-  position: fixed; 
-  width: 100%; 
-  height: 100%; 
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.7); 
-  z-index: 2; 
-}
-
-.instructions {
-    width: 560px;
-    height: 200px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-	transform: translate(-50%, -50%);
-    background-color: rgba(0,0,0); 
-    margin: auto;
-    border: 1px solid #0095DD;
-    padding: 0;
-}
-
 h1 {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
@@ -65,49 +16,46 @@ h1 {
     position: absolute;
 }
 
-p {
+h2 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #FFFFFF;
+    left: 50%;
+    top: 45px;
+    transform: translate(-50%, -50%);
+    position: absolute;
+}
+
+.desktopinstructions {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10px;
     color: #FFFFFF;
     left: 50%;
-    top: 60px;
+    top: 75px;
     bottom: 60px;
     width: 75%;
-    text-align: left;
+    text-align: center;
     transform: translate(-50%, 0);
     position: absolute;
     margin: 0;
     padding: 0;
 }
 
-.container {
-  display: block;
-  position: absolute;
-  padding-left: 15px;
-  margin-bottom: 12px;
-  cursor: pointer;
-  font-size: 10px;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  color: #FFFFFF;
-  font-family: Arial, Helvetica, sans-serif;
-  bottom: 10px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.mobileinstructions {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    color: #FFFFFF;
+    left: 50%;
+    top: 75px;
+    bottom: 60px;
+    width: 75%;
+    text-align: center;
+    transform: translate(-50%, 0);
+    position: absolute;
+    margin: 0;
+    padding: 0;
 }
 
-/* Hide the browser's default checkbox */
-.container input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-/* Create a custom checkbox */
 .checkmark {
   position: absolute;
   top: 0;
@@ -117,39 +65,10 @@ p {
   background-color: #eee;
 }
 
-/* On mouse-over, add a grey background color */
-.container:hover input ~ .checkmark {
-  background-color: #ccc;
-}
-
-/* When the checkbox is checked, add a blue background */
-.container input:checked ~ .checkmark {
-  background-color: #0095DD;
-}
-
-/* Create the checkmark/indicator (hidden when not checked) */
 .checkmark:after {
   content: "";
   position: absolute;
   display: none;
-}
-
-/* Show the checkmark when checked */
-.container input:checked ~ .checkmark:after {
-  display: block;
-}
-
-/* Style the checkmark/indicator */
-.container .checkmark:after {
-  left: 3px;
-  top: 1px;
-  width: 3px;
-  height: 4px;
-  border: solid white;
-  border-width: 0 3px 3px 0;
-  -webkit-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  transform: rotate(45deg);
 }
 
 .close {
@@ -188,4 +107,417 @@ p {
 
 .close:after {
   transform: rotate(-45deg);
+}
+
+.container {
+  display: block;
+  position: absolute;
+  padding-left: 15px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 10px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #FFFFFF;
+  font-family: Arial, Helvetica, sans-serif;
+  bottom: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+.container input:checked ~ .checkmark {
+  background-color: #0095DD;
+}
+
+.container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+.container .checkmark:after {
+  left: 3px;
+  top: 1px;
+  width: 3px;
+  height: 4px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.information {
+    position: absolute;
+    bottom: 15px;
+    right: 30px;
+    color: #FFFFFF;
+    z-index: 1;
+}
+
+.information a:link {
+  color: #FFFFFF;
+}
+
+.information a:visited {
+  color: #FFFFFF;
+}
+
+.information a:hover {
+  color: #0095DD;
+}
+
+.information a:active {
+  color: #FFFFFF;
+}
+
+.instructions {
+    width: 33%;
+    height: 25%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+	transform: translate(-50%, -50%);
+    background-color: rgba(0,0,0); 
+    margin: auto;
+    border: 1px solid #0095DD;
+    padding: 0;
+}
+
+.overlay {
+  position: fixed; 
+  width: 100%; 
+  height: 100%; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.7); 
+  z-index: 2; 
+}
+
+/* Media queries */
+
+/* iPad Pro */
+
+@media (max-height: 1024px) and (max-width: 1366px) {
+        
+    .instructions {
+        width: 75%;
+        height: 20%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 1366px) and (max-width: 1024px) {
+
+    .instructions {
+        width: 75%;
+        height: 15%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+/* iPad */
+
+@media (max-height: 1024px) and (max-width: 768px) {
+        
+    .instructions {
+        width: 75%;
+        height: 20%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 768px) and (max-width: 1024px) {
+    
+    .instructions {
+        width: 75%;
+        height: 25%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+/* iPhone X */
+
+@media (max-height: 812px) and (max-width: 375px) {
+        
+    .instructions {
+        width: 75%;
+        height: 30%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 375px) and (max-width: 812px) {
+    
+    .instructions {
+        width: 75%;
+        height: 55%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+/* iPhone 6/7/8 Plus */
+
+@media (max-height: 414px) and (max-width: 736px) {
+        
+    .instructions {
+        width: 75%;
+        height: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 736px) and (max-width: 414px) {
+    
+    .instructions {
+        width: 75%;
+        height: 35%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+/* iPhone 6/7/8 */
+
+@media (max-height: 375px) and (max-width: 667px) {
+        
+    .instructions {
+        width: 75%;
+        height: 55%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 667px) and (max-width: 375px) {
+    
+    .instructions {
+        width: 75%;
+        height: 40%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+/* Samsung Galaxy S series */
+
+@media (max-height: 360px) and (max-width: 640px) {
+        
+    .instructions {
+        width: 75%;
+        height: 60%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
+}
+
+@media (max-height: 640px) and (max-width: 360px) {
+    
+    .instructions {
+        width: 75%;
+        height: 40%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+	    transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0); 
+        margin: auto;
+        border: 1px solid #0095DD;
+        padding: 0;
+    }
+
+    .mobileinstructions {
+        display: block;
+    }
+
+    .desktopinstructions {
+        display: none;
+    }
+
 }

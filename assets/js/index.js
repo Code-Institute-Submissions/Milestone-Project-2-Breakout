@@ -1,3 +1,5 @@
+// GAME FUNCTIONALITY
+
 // game parameters
 const BALL_SPEED = 0.5; // starting ball speed as a fraction of screen height per second
 const BALL_SPEED_MAX = 1.5; // max ball speed as a multiple of starting speed
