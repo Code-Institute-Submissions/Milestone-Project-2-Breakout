@@ -1,6 +1,8 @@
 # Milestone Project 2: Breakout
 
-![MS2-breakout-responsiveness](https://github.com/NicoPauwels/Milestone-Project-Breakout/blob/5b4218956685d3abfcc53f00e90d95f88cb50be4/assets/images/readme/ms2-breakout-responsiveness.png)
+![MS2-breakout-responsiveness](https://github.com/NicoPauwels/Milestone-Project-2-Breakout/blob/master/assets/images/readme/ms2-breakout-responsiveness.png)
+
+
 
 
 
@@ -40,9 +42,9 @@ With the current scope and features the gamefield will take up the entire screen
 
 Below the wireframes:
 
-* Desktop wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-Breakout/blob/5b4218956685d3abfcc53f00e90d95f88cb50be4/assets/images/readme/wireframe-desktop.png)
-* Tablet wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-Breakout/blob/5b4218956685d3abfcc53f00e90d95f88cb50be4/assets/images/readme/wireframe-tablet.png)
-* Mobile wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-Breakout/blob/5b4218956685d3abfcc53f00e90d95f88cb50be4/assets/images/readme/wireframe-mobile.png)
+* Desktop wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-2-Breakout/blob/master/assets/images/readme/wireframe-desktop.png)
+* Tablet wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-2-Breakout/blob/master/assets/images/readme/wireframe-tablet.png)
+* Mobile wireframe - [View](https://github.com/NicoPauwels/Milestone-Project-2-Breakout/blob/master/assets/images/readme/wireframe-mobile.png)
 
 ## Surface
 
