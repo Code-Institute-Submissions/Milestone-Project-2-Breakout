@@ -2,12 +2,8 @@
 
 ![MS2-breakout-responsiveness](https://github.com/NicoPauwels/Milestone-Project-2-Breakout/blob/master/assets/images/readme/ms2-breakout-responsiveness.png)
 
+[View the live project here.](https://nicopauwels.github.io/Milestone-Project-2-Breakout/)<br>The original arcade game was introduced by Atari in 1976. I decided to create my own version of it.
 
-
-
-
-You can visit the project [here!](https://nicopauwels.github.io/Milestone-Project-2-Breakout/)<br>My own version of Breakout.<br><br>
-The original arcade game was introduced by Atari in 1976.
 
 # UX
 
@@ -16,13 +12,19 @@ The original arcade game was introduced by Atari in 1976.
 We want to create a reconstruction of the original Breakout game. Breakout begins with eight rows of bricks. Using a single ball, the player must destroy as many bricks as possible by using the walls and the paddle below. If the player misses the ball's rebound, he or she will lose a life. In the beginning of the game the player has three lives to clear 10 screens of bricks. Each new level the player has to destroy an additional two rows of bricks. The ball speed increases when the ball hits a brick which has a slightly darker colour. There's a chance that a destroyed brick contains a powerup. The powerup will fall down to the bottom of the screen and if the user is able to catch it with its paddle it will become active. Possible powerups are: an extra life, an extension of the paddle, a superball (destroying all the bricks on its path), a sticky paddle (will make the ball stick to the paddle) and a multiball powerup (two additional balls will be spawned and set course to destroy extra bricks).
 
 #### User stories: 
-* I want to play Breakout;
-* I want to be able to serve the ball;
-* I want to be able to destroy the bricks;
-* I want to be able to keep the ball in the game with the paddle;
-* I want to be able to see the powerups falling down to the bottom of the screen;
-* I want to be able to catch the powerups and experience them in the gameplay;
-* I want to know which level I am playing, how many lives I've got left, my current score, my all time high score and whether the sound is on or off.
+* First time Visitor Goals
+    * As a first time visitor, I want to be able to figure out what the game controls are;
+    * As a first time visitor, I want to be able to serve the ball;
+    * As a first time visitor, I want to be able to keep the ball inbound using the paddle;
+    * As a first time visitor, I want to see the powerups falling down to the bottom of the screen;
+    * As a first time visitor, I want to be able to catch the powerups and experience them in the gameplay;
+    * As a first time visitor, I want to know which level I am playing, how many lives I've got left, my current score, my all time high score and whether the sound is on or off.
+* Returning Visitor Goals
+    * As a returning visitor, I do not necessarily need to see the game controls;
+    * As a returning visitor, I obviously want the same game experience as a first time visitor;
+    * As a returning visitor, I want to see my all time high score.
+* Frequent User Goals
+    * As a frequent user of this game, I want to same user experience as a returning visitor.
 
 ## Scope / Features
 
@@ -81,14 +83,14 @@ We want this version of Outbreak to have a more modern look than the original ve
 # The realisation of this project
 
 * [Tutorial 1:](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript)
-    I started off the project based on this tutorial, when finalizing this tutorial I wanted to use the gained knowledge to add some powerups, I soon found myself down a rabbithole and I was losing way too much time trying to figure out how to add this powerup functionality to the game. I did manage to hide a few powerups underneath some bricks, and they do fall towards the bottom of the screen. I decided to browse the web to find another tutorial that contained these powerup functionality to see how it is done right and which logic was used. I left the outcome of this excercise in this project in the assets\js folder: index_ver1.js.
+    I started off the project based on this tutorial, when finalizing this tutorial I wanted to use the gained knowledge to add some powerups, I soon found myself down a rabbithole and I was losing way too much time trying to figure out how to add this powerup functionality to the game. I did manage to hide a few powerups underneath some bricks, and they do fall towards the bottom of the screen. I decided to browse the web to find another tutorial that contained these powerup functionality to see how it is done right and which logic was used.
 
 * [Tutorial 2:](https://www.youtube.com/c/MtFordStudios/videos)
     As discussed in the previous bulletpoint, a second tutorial was used to gain more insight on how to properly implement powerups into the game. I quickly found myself facing another dilemma: trying to implement the poweruplogic from this tutorial in my already existing javascript code or starting from scratch. I decided to play it safe and start completely based on this tutorial.
     In the end I am sure this was the right thing to do because this tutorial was approaching some things in a complete different way and features that were being built at the end of the project were based on the solid foundation and logic layed out in the beginning.
 
 * My very own feature:
-    When I finalized the project based on tutorial 2, I had a severe case of imposter syndrome. I just had to add a feature of my own to the project. I used to play this game at a very young age on my uncles 486. There was a powerup in the version I used to play that was not a part of this version yet: the multiball. I decided to give it a go and by reverse engineering what was happening in the existing code and some sleepless nights later I was able to implement the multiball feature. Although I have deactivated the spinBall() function to get it to work and some bugs might occur when combined with other powerups, I am happy with the outcome for now. It just comes down to fixing these bugs and refactoring the spinBall() function.
+     I just had to add a feature of my own to the project. I used to play this game at a very young age on my uncles 486. There was a powerup in the version I used to play that was not a part of this version yet: the multiball. I decided to give it a go and by reverse engineering what was going on in the existing code and some sleepless nights later I was able to implement the multiball feature. Although I have deactivated the spinBall() function to get it to work and some bugs might occur when combined with other powerups, I am happy with the outcome for now. It just comes down to fixing these bugs and refactoring the spinBall() function.
 
 # Testing
 
@@ -100,24 +102,37 @@ The W3C Markup Validator, W3C CSS Validator and jshint.com services were used to
 
 ## Testing user stories discussed earlier
 
-* I want to play Breakout;
-    * User is able to play Breakout.
-* I want to be able to serve the ball;
-    * User is able to serve the ball by hitting the spacebar or touching the screen on mobile devices.
-* I want to be able to destroy the bricks;
-    * When a ball hits a brick it dissapears.
-* I want to be able to keep the ball in the game with the paddle;
-    * When the ball hits the paddle it bounces back as expected.
-* I want to be able to see the powerups falling down to the bottom of the screen;
-    * When a powerup is to be found under a destroyed brick, it starts falling towards the bottom of the screen.
-* I want to be able to catch the powerups and experience them in the gameplay;
-    * When a powerup is caught by the paddle, it is activated.
-* I want to know which level I am playing, how many lives I've got left, my current score, my all time high score and whether the sound is on or off.
-    * The level is being displayed and increases when all bricks have been destroyed, also a new level is being spawned.
-    * The lives decrease when a ball is out of bounds, the game ends when all lives are lost and game over is being displayed.
-    * The current score is being increased depending on the brick that was destroyed its rank.
-    * The all time high score is kept track off by using window.localStorage and thus saves the high score across browser sessions.
-    * Also whether the sound is on or off is being displayed.
+* First time Visitor Goals
+    * As a first time visitor, I want to be able to figure out what the game controls are;
+        * The user is informed on the game controls on the landing page.
+    * As a first time visitor, I want to be able to serve the ball;
+        * When the spacebar is hit (desktop) or the screen is touched (mobile), the user serves the ball.
+    * As a first time visitor, I want to be able to keep the ball inbound using the paddle;
+        * The paddle can be moved to left and right with the corresponding arrow keys (desktop) or touching the left or right side of the screen (mobile) to catch the ball and bounce it back.
+    * As a first time visitor, I want to see the powerups falling down to the bottom of the screen;
+        * There's a 5 percent chance a destroyed brick has a powerup underneath, if this is the case the powerup will fall down towards the bottom of the screen.
+    * As a first time visitor, I want to be able to catch the powerups and experience them in the gameplay;
+        * When a powerup is caught by the paddle, it becomes active:
+            * extra life
+            * extended paddle
+            * sticky paddle (paddle turns red)
+            * superball (ball turns red)
+            * multiball (two extra balls enter the game field)
+    * As a first time visitor, I want to know which level I am playing, how many lives I've got left, my current score, my all time high score and whether the sound is on or off.
+        * The level is being displayed and increases when all bricks have been destroyed, also a new level is being spawned.
+        * The lives decrease when a ball is out of bounds, the game ends when all lives are lost and game over is being displayed.
+        * The current score is being increased depending on the brick that was destroyed its rank.
+        * The all time high score is kept track off by using window.localStorage and thus saves the high score across browser sessions.
+        * Also whether the sound is on or off is being displayed.
+* Returning Visitor Goals
+    * As a returning visitor, I do not necessarily need to see the game controls;
+        * The user has the option to check the "do not show this message again" checkbox in order to not see the game instructions again when the game is loaded next time.
+    * As a returning visitor, I obviously want the same game experience as a first time visitor;
+        * All of the functionality is in place as discussed above.
+    * As a returning visitor, I want to see my all time high score.
+        * The alltime high score is stored in localstorage and thus across browser sessions.
+* Frequent User Goals
+    * As a frequent user of this game, I want to same user experience as a returning visitor.
 
 ## Further Testing
 
@@ -132,7 +147,6 @@ The W3C Markup Validator, W3C CSS Validator and jshint.com services were used to
 * When multiball has been active and sticky powerup is activated bugs might occur:
     * the balls don't serve correctly or dont serve at all when sticky powerup is active
     * the balls that went out of play suddenly appear back on the canvas
-
 
 # Deployment
 
@@ -160,4 +174,3 @@ The project was deployed to GitHub Pages using the following steps:
 
 * Antonio Rodriguez, my mentor for the continuous support and helpful feedback.
 * John Traas, Code Institute alumni, for the continuous support and helpful feedback.
-* Sander Van De Wiele for testing the project on his mobile device.
